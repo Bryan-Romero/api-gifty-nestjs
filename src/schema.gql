@@ -1,0 +1,84 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AccessResDto {
+  access_token: String!
+  refresh_token: String!
+  user: User
+}
+
+input CreateUserDto {
+  email: String!
+  username: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input EmailVerifiedDto {
+  token: String!
+}
+
+type FindAllResDto {
+  data: [User!]!
+  total_items: Int!
+  total_pages: Int!
+}
+
+type MessageResDto {
+  message: String
+}
+
+type Mutation {
+  createUser(createUserDto: CreateUserDto!): User!
+  updateUser(id: String!, updateUserDto: UpdateUserDto!): User!
+}
+
+input PaginationDto {
+  limit: Int = 10
+  offset: Int = 0
+}
+
+type Query {
+  emailVerified(emailVerifiedDto: EmailVerifiedDto!): MessageResDto!
+  findAllUsers(paginationDto: PaginationDto!): FindAllResDto!
+  findUserById(id: String!): User!
+  getHello: String!
+  logout: MessageResDto!
+  me: User!
+  refreshTokens: AccessResDto!
+  resendVerificationEmail: MessageResDto!
+  signIn(signInDto: SignInDto!): AccessResDto!
+  signUp(signUpDto: SignUpDto!): AccessResDto!
+}
+
+input SignInDto {
+  email: String!
+  password: String!
+}
+
+input SignUpDto {
+  email: String!
+  password: String!
+  username: String!
+}
+
+input UpdateUserDto {
+  age: Int
+  username: String
+}
+
+type User {
+  _id: ID!
+  active: Boolean!
+  age: Int
+  createdAt: DateTime!
+  email: String!
+  emailVerified: Boolean!
+  roles: [String!]!
+  updatedAt: DateTime!
+  username: String!
+}
