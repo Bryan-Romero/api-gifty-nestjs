@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  api-development:
+    container_name: api-development
+    restart: unless-stopped
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    ports:
+      - 4000:4000
+      - 9229:9229 # for debugging
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: mymongodb
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo:/data/db
+      - ./mongo/log:/var/log/mongodb/
+
+volumes:
+  node_modules:
