@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  api-production:
+    container_name: api-production
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: production
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: mymongodb
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo:/data/db
+      - ./mongo/log:/var/log/mongodb/
+
+volumes:
+  node_modules:
