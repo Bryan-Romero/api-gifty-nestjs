@@ -1,59 +1,52 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { randomUUID } from 'crypto';
 import { MessageResDto } from 'src/common/dtos';
-import { ExceptionMessage, StandardMessage } from 'src/common/enums';
+import { StandardMessage } from 'src/common/enums';
+import { ConfigurationType, JwtType } from 'src/config/configuration.interface';
 import { MailService } from 'src/modules/mail/mail.service';
 import { User, UserModel } from 'src/modules/user/entities/user.entity';
 import { EmailVerifiedDto } from '../dto/email-verified.dto';
+import { ResendEmailDto } from '../dto/resend-email.dto';
 
 @Injectable()
 export class VerificationService {
   constructor(
     @InjectModel(User.name) private userModel: UserModel,
     private readonly mailService: MailService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService<ConfigurationType>,
   ) {}
 
   async emailVerified(
     emailVerifiedDto: EmailVerifiedDto,
   ): Promise<MessageResDto> {
-    const { token } = emailVerifiedDto;
-
-    const user = await this.userModel.findOne({
-      emailVerifiedToken: token,
-      active: true,
-    });
-    if (!user)
-      throw new NotFoundException(
-        ExceptionMessage.NOT_FOUND,
-        `User with emailVerifiedToken ${token} does not exist`,
+    try {
+      const { token } = emailVerifiedDto;
+      const { mail_secret } = this.configService.get<JwtType>('jwt');
+      const payload = this.jwtService.verify(token, {
+        secret: mail_secret,
+      });
+      // Busca el usuario por email y márcalo como verificado
+      await this.userModel.updateOne(
+        { email: payload.email },
+        { emailVerified: true },
       );
-
-    user.emailVerifiedToken = null;
-    user.emailVerified = true;
-    await user.save();
-
-    return { message: StandardMessage.SUCCESS };
+      return { message: StandardMessage.SUCCESS };
+    } catch (e) {
+      throw new BadRequestException('Invalid or expired token');
+    }
   }
 
-  async resendVerificationEmail(email: string): Promise<MessageResDto> {
-    const user = await this.userModel.findOne(
-      { email, active: true },
-      '+emailVerifiedToken',
-    );
-    if (!user)
-      throw new NotFoundException(
-        ExceptionMessage.NOT_FOUND,
-        `User with email ${email} does not exist`,
-      );
+  async resendVerificationEmail(
+    resendEmailDto: ResendEmailDto,
+  ): Promise<MessageResDto> {
+    const { email } = resendEmailDto;
+    const user = await this.userModel.findOne({ email, active: true });
+    if (!user) return { message: StandardMessage.SUCCESS };
 
-    if (!user.emailVerifiedToken) {
-      const emailVerifiedToken = randomUUID();
-      user.emailVerifiedToken = emailVerifiedToken;
-      await user.save();
-    }
-
-    await this.mailService.sendUserConfirmation(user, user.emailVerifiedToken);
+    this.mailService.sendUserConfirmation(user);
 
     return {
       message: StandardMessage.SUCCESS,

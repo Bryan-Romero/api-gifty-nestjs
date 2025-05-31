@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { Role } from 'src/common/enums';
+import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
 
 @Schema({ timestamps: true })
 export class User {
@@ -11,11 +12,15 @@ export class User {
   @Prop({ type: Boolean, default: true, select: false })
   active: boolean;
 
-  @Prop({ type: String })
+  @Prop({
+    type: String,
+    unique: true,
+    index: true,
+    sparse: true,
+    trim: true,
+    required: true,
+  })
   username: string;
-
-  @Prop({ type: String })
-  age: number;
 
   @Prop({
     type: String,
@@ -40,8 +45,8 @@ export class User {
   @Prop({ type: Boolean, default: false })
   emailVerified: boolean;
 
-  @Prop({ type: String, select: false })
-  emailVerifiedToken: string;
+  @Prop({ type: [{ type: Types.ObjectId, ref: Favorite.name }] })
+  favorites: Favorite[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

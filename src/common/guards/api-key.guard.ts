@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigurationType } from 'src/config/configuration.interface';
-import { ExceptionMessage } from '../enums';
 
 export const X_API_KEY = 'x-api-key';
 
@@ -23,10 +22,7 @@ export class ApiKeyGuard implements CanActivate {
       : request.headers[X_API_KEY];
 
     if (!this.validApyKeyFromHeader(apiKey)) {
-      throw new UnauthorizedException(
-        ExceptionMessage.UNAUTHORIZED,
-        'Invalid API Key',
-      );
+      throw new UnauthorizedException('Invalid API Key');
     }
     return true;
   }

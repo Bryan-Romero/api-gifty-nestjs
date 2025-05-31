@@ -1,15 +1,13 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { logger } from './common/middlewares';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import helmet from 'helmet';
 import * as compression from 'compression';
-import { ConfigurationType } from './config/configuration.interface';
+import helmet from 'helmet';
+import { AppModule } from './app.module';
 import { X_API_KEY } from './common/guards';
-import { ValidationError } from 'class-validator';
-import { ExceptionMessage } from './common/enums';
+import { logger } from './common/middlewares';
+import { ConfigurationType } from './config/configuration.interface';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,7 +15,6 @@ async function bootstrap() {
   const prefix = configService.get<string>('prefix');
   const port = configService.get<number>('port');
   const node_env = configService.get<string>('node_env');
-  console.log('Environment: ', node_env);
 
   // Global prefix
   app.setGlobalPrefix(prefix);
@@ -34,19 +31,15 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
-      exceptionFactory: (errors: ValidationError[]) => {
-        const messages = errors.map((error) => {
-          const constraints = error.constraints;
-          if (constraints) {
-            return Object.values(constraints).join(', ');
-          } else {
-            return `${error.property} has an invalid value`;
+      exceptionFactory: (errors) => {
+        // Converts errors into one object per field
+        const result = {};
+        errors.forEach((error) => {
+          if (error.constraints) {
+            result[error.property] = Object.values(error.constraints);
           }
         });
-        throw new BadRequestException(
-          messages.join(', '),
-          ExceptionMessage.BAD_REQUEST,
-        );
+        return new BadRequestException(result);
       },
     }),
   );
@@ -68,6 +61,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // Listen
+  console.log('Environment: ', node_env);
   console.log('Server listening on port: ', port);
   await app.listen(port);
 }

@@ -5,6 +5,7 @@ export interface ConfigurationType {
   port: number;
   prefix: string;
   api_key: string;
+  frontend_url: string;
   database: DatabaseType;
   default_user: DefaultUserType;
   jwt: JwtType;
@@ -13,7 +14,8 @@ export interface ConfigurationType {
 }
 
 export interface DatabaseType {
-  uri: string;
+  db_uri: string;
+  db_name: string;
 }
 
 export interface DefaultUserType {
@@ -26,8 +28,12 @@ export interface DefaultUserType {
 export interface JwtType {
   secret: string;
   expires_in: string;
-  secret_refresh: string;
-  expires_in_refresh: string;
+  refresh_secret: string;
+  refresh_expires_in: string;
+  mail_secret: string;
+  mail_expires_in: string;
+  password_secret: string;
+  password_expires_in: string;
 }
 
 export interface MailType {
@@ -35,5 +41,5 @@ export interface MailType {
   user: string;
   password: string;
   from: string;
-  port?: number;
+  port: number;
 }

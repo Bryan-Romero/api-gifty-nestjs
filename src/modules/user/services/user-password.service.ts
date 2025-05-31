@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { MessageResDto } from 'src/common/dtos';
-import { ExceptionMessage, StandardMessage } from 'src/common/enums';
+import { StandardMessage } from 'src/common/enums';
 import { JwtForgotPassPayload } from 'src/common/interfaces';
 import { ConfigurationType, JwtType } from 'src/config/configuration.interface';
 import { BcryptjsService } from 'src/modules/bcryptjs/bcryptjs.service';
@@ -33,10 +33,9 @@ export class UserPasswordService {
   ): Promise<MessageResDto> {
     const { email } = forgotPasswordDto;
     // Find user by email with exception if not found
-    const user = await this.userService.findUserByEmail(email, '+password');
+    const user = await this.userService.findUserByEmail(email);
 
-    const forgotPasswordToken = await this.getForgotPasswordToken(user);
-    await this.mailService.sendForgotPassword(user, forgotPasswordToken);
+    await this.mailService.sendForgotPassword(user);
 
     return {
       message: StandardMessage.SUCCESS,
@@ -47,28 +46,17 @@ export class UserPasswordService {
     resetPasswordDto: ResetPasswordDto,
   ): Promise<MessageResDto> {
     try {
-      const { _id, password, confirmPassword, token } = resetPasswordDto;
-      // Find user by id with exception if not found
-      const user = await this.userService.findUserById(_id, '+password');
+      console.log('✅');
+      const { password, token } = resetPasswordDto;
 
-      const secret =
-        this.configService.get<JwtType>('jwt').secret + user.password;
-      const { email, sub } =
-        await this.jwtService.verifyAsync<JwtForgotPassPayload>(token, {
-          secret,
-        });
+      const secret = this.configService.get<JwtType>('jwt').password_secret;
+      const { email } = await this.jwtService.verifyAsync<JwtForgotPassPayload>(
+        token,
+        { secret },
+      );
 
-      if (user.email !== email || user._id.toString() !== sub)
-        throw new BadRequestException(
-          ExceptionMessage.BAD_REQUEST,
-          'Email do not match',
-        );
-
-      if (password !== confirmPassword)
-        throw new BadRequestException(
-          ExceptionMessage.BAD_REQUEST,
-          'Passwords do not match',
-        );
+      // Find user by email with exception if not found
+      const user = await this.userService.findUserByEmail(email);
 
       const hash = await this.bcryptjsService.hashData(password);
       user.password = hash;
@@ -78,9 +66,7 @@ export class UserPasswordService {
         message: StandardMessage.SUCCESS,
       };
     } catch (error) {
-      if (error instanceof HttpException) throw error;
-
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN, 'Invalid token');
+      throw new BadRequestException('Invalid or expired token');
     }
   }
 
@@ -93,10 +79,7 @@ export class UserPasswordService {
 
     const { password, confirmPassword } = updatePasswordDto;
     if (password !== confirmPassword)
-      throw new BadRequestException(
-        ExceptionMessage.BAD_REQUEST,
-        'Passwords do not match',
-      );
+      throw new BadRequestException('Passwords do not match');
 
     const hash = await this.bcryptjsService.hashData(password);
     user.password = hash;
@@ -105,20 +88,5 @@ export class UserPasswordService {
     return {
       message: StandardMessage.SUCCESS,
     };
-  }
-
-  async getForgotPasswordToken(user: User): Promise<string> {
-    const { email, _id, password } = user;
-    const payload: JwtForgotPassPayload = {
-      sub: _id.toString(),
-      email,
-    };
-    const secret = this.configService.get<JwtType>('jwt').secret + password;
-    const forgotPasswordToken = await this.jwtService.signAsync(payload, {
-      secret,
-      expiresIn: this.configService.get<JwtType>('jwt').expires_in,
-    });
-
-    return forgotPasswordToken;
   }
 }

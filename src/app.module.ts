@@ -16,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { BcryptjsModule } from './modules/bcryptjs/bcryptjs.module';
 import { MailModule } from './modules/mail/mail.module';
 import { UserModule } from './modules/user/user.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UserModule } from './modules/user/user.module';
     BcryptjsModule,
     MailModule,
     MyConfigModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [

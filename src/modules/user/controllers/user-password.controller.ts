@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MessageResDto } from 'src/common/dtos';
-import { ApiKey, GetUser, JwtAuth } from '../../../common/decorators';
+import { ApiKey, GetUser } from '../../../common/decorators';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
@@ -48,10 +48,9 @@ export class UserPasswordController {
 
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Reset password',
+    description: 'Update password',
     type: MessageResDto,
   })
-  @JwtAuth()
   @Patch('update')
   updatePassword(
     @GetUser('_id') _id: string,

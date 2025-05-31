@@ -1,8 +1,9 @@
-import { Body, Controller, HttpStatus, Patch, Post } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ApiKey, GetUser, JwtAuth } from 'src/common/decorators';
+import { ApiKey } from 'src/common/decorators';
 import { MessageResDto } from 'src/common/dtos';
 import { EmailVerifiedDto } from '../dto/email-verified.dto';
+import { ResendEmailDto } from '../dto/resend-email.dto';
 import { VerificationService } from '../services/verification.service';
 
 @ApiKey()
@@ -16,10 +17,9 @@ export class VerificationController {
     description: 'Email verified',
     type: MessageResDto,
   })
-  @JwtAuth()
-  @Patch('email')
+  @Get('email')
   emailVerified(
-    @Body() emailVerifiedDto: EmailVerifiedDto,
+    @Query() emailVerifiedDto: EmailVerifiedDto,
   ): Promise<MessageResDto> {
     return this.verificationService.emailVerified(emailVerifiedDto);
   }
@@ -29,11 +29,10 @@ export class VerificationController {
     description: 'Resend verification email',
     type: MessageResDto,
   })
-  @JwtAuth()
-  @Post('resend-email')
+  @Get('resend-email')
   resendVerificationEmail(
-    @GetUser('email') email: string,
+    @Query() resendEmailDto: ResendEmailDto,
   ): Promise<MessageResDto> {
-    return this.verificationService.resendVerificationEmail(email);
+    return this.verificationService.resendVerificationEmail(resendEmailDto);
   }
 }

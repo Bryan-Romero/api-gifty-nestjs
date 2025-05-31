@@ -1,9 +1,9 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Types } from 'mongoose';
+import { User } from '../entities/user.entity';
 import { Role } from 'src/common/enums';
-import { User } from 'src/modules/user/entities/user.entity';
+import { Types } from 'mongoose';
 
-export class UserAccessResDto extends PickType(User, [
+export class ME extends PickType(User, [
   '_id',
   'createdAt',
   'updatedAt',
@@ -36,23 +36,4 @@ export class UserAccessResDto extends PickType(User, [
 
   @ApiProperty({ type: Role, enum: Role })
   roles: Role[];
-}
-
-export class TokensAccessResDto {
-  @ApiProperty({ type: String })
-  access_token: string;
-
-  @ApiProperty({ type: Number })
-  expires_in: number;
-
-  @ApiProperty({ type: String })
-  refresh_token: string;
-}
-
-export class AccessResDto {
-  @ApiProperty({ type: UserAccessResDto })
-  user: UserAccessResDto;
-
-  @ApiProperty({ type: TokensAccessResDto })
-  tokens: TokensAccessResDto;
 }

@@ -16,12 +16,12 @@ export class JwtRefreshStrategy extends PassportStrategy(
     configService: ConfigService<ConfigurationType>,
     private readonly userService: UserService,
   ) {
-    const { secret_refresh } = configService.get<JwtType>('jwt');
+    const { refresh_secret } = configService.get<JwtType>('jwt');
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: secret_refresh,
+      secretOrKey: refresh_secret,
       // passReqToCallback: true,
     });
     // passReqToCallback: true, Allows us to add the request to the callback function in the validation method like:

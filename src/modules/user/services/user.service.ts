@@ -6,7 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { PipelineStage, ProjectionType } from 'mongoose';
 import { MessageResDto, PaginationDto } from 'src/common/dtos';
-import { ExceptionMessage, Role, StandardMessage } from 'src/common/enums';
+import { Role, StandardMessage } from 'src/common/enums';
 import { UserRequest } from 'src/common/interfaces';
 import { generateRandomPassword } from 'src/common/utils/generate-random-pass';
 import { BcryptjsService } from 'src/modules/bcryptjs/bcryptjs.service';
@@ -14,6 +14,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { FindAllResDto } from '../dto/find-all-res.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User, UserDocument, UserModel } from '../entities/user.entity';
+import { ME } from '../dto/me.dto';
 
 @Injectable()
 export class UserService {
@@ -23,17 +24,10 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { email } = createUserDto;
+    const { email, username } = createUserDto;
 
-    const findUser = await this.userModel.findOne({
-      email,
-    });
-
-    if (findUser)
-      throw new ConflictException(
-        ExceptionMessage.CONFLICT,
-        `User ${findUser.email} already exists`,
-      );
+    // Validate if user already exists
+    await this.validateIfUserExists({ email, username });
 
     const randomPassword = generateRandomPassword(12);
     console.log(randomPassword);
@@ -55,52 +49,26 @@ export class UserService {
   }
 
   async findAll(paginationDto: PaginationDto): Promise<FindAllResDto> {
-    const { limit = 10, page = 1 } = paginationDto;
-
-    const pipeline: PipelineStage[] = [
-      { $match: { active: true, roles: { $in: [Role.USER] } } },
-      {
-        $facet: {
-          data: [
-            { $skip: (page - 1) * limit },
-            { $limit: limit },
-            { $project: { password: 0, roles: 0, active: 0 } },
-          ],
-          totalCount: [{ $count: 'total' }],
-        },
-      },
-      {
-        $unwind: {
-          path: '$totalCount',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $addFields: {
-          total: '$totalCount.total',
-        },
-      },
-      {
-        $project: {
-          totalCount: 0,
-        },
-      },
-    ];
-
-    const result = await this.userModel.aggregate(pipeline);
-    const users = result[0].data;
-
     return {
-      data: users,
-      total_items: result[0].total || 0,
-      total_pages: Math.ceil(result[0].total / Number(limit)) || 0,
+      data: [],
+      total_items: 0,
+      total_pages: 0,
     };
   }
 
-  async me(_id: string): Promise<User> {
+  async me(_id: string): Promise<ME> {
     const user = await this.findUserById(_id);
 
-    return user;
+    return {
+      _id: user._id,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      active: user.active,
+      username: user.username,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      roles: user.roles,
+    };
   }
 
   async findOne(_id: string): Promise<User> {
@@ -112,8 +80,7 @@ export class UserService {
   async update(_id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findUserById(_id);
 
-    const { age, username } = updateUserDto;
-    user.age = age;
+    const { username } = updateUserDto;
     user.username = username;
     await user.save();
 
@@ -159,10 +126,7 @@ export class UserService {
     );
 
     if (!user && whitException)
-      throw new NotFoundException(
-        ExceptionMessage.NOT_FOUND,
-        `User with email ${email} does not exist`,
-      );
+      throw new NotFoundException(`User with email ${email} does not exist`);
 
     return user || null;
   }
@@ -178,11 +142,32 @@ export class UserService {
     );
 
     if (!user && whitException)
-      throw new NotFoundException(
-        ExceptionMessage.NOT_FOUND,
-        `User with _id ${_id} does not exist`,
-      );
+      throw new NotFoundException(`User with _id ${_id} does not exist`);
 
     return user || null;
+  }
+
+  async validateIfUserExists({
+    email,
+    username,
+  }: Pick<User, 'username' | 'email'>) {
+    const [userByEmail, userByUsername] = await Promise.all([
+      this.userModel.findOne({
+        email: { $regex: new RegExp(`^${email}$`, 'i') },
+      }),
+      this.userModel.findOne({
+        username: { $regex: new RegExp(`^${username}$`, 'i') },
+      }),
+    ]);
+    /** En una expresión regular, ^ indica el inicio de la cadena y $
+     * indica el final de la cadena. Por ejemplo, ^texto$ solo hace match
+     * si la cadena es exactamente "texto" (no "otexto", ni "texto1"). */
+
+    if (userByEmail || userByUsername) {
+      const errors = {};
+      if (userByEmail) errors['email'] = 'Email already exists';
+      if (userByUsername) errors['username'] = 'Username already exists';
+      throw new ConflictException(errors);
+    }
   }
 }

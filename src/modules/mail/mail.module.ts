@@ -2,12 +2,12 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { join } from 'path';
 import {
   ConfigurationType,
   MailType,
 } from 'src/config/configuration.interface';
 import { MailService } from './mail.service';
-import { join } from 'path';
 
 @Global()
 @Module({
@@ -21,14 +21,18 @@ import { join } from 'path';
           transport: {
             host: mail.host,
             port: mail.port,
-            secure: false,
+            secure: true, // Cambiar a true si usas el puerto 465
+            socketTimeout: 60000, // 60 segundos
             auth: {
               user: mail.user,
               pass: mail.password,
             },
           },
+          tls: {
+            rejectUnauthorized: false, // Evita problemas con certificados
+          },
           defaults: {
-            from: `"No Reply" <${mail.from}>`,
+            from: `"GIFty" <${mail.from}>`,
           },
           template: {
             dir: join(process.cwd(), '/static/templates'),

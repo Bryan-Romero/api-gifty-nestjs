@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators';
-import { ExceptionMessage, Role, RoleLevel } from '../enums';
+import { Role, RoleLevel } from '../enums';
 import { CustomRequest } from '../interfaces';
 
 @Injectable()
@@ -29,7 +29,8 @@ export class RolesGuard implements CanActivate {
 
     const hasPrivilege = this.checkUserAuthorization(roles, requiredRoles);
 
-    if (!hasPrivilege) throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+    if (!hasPrivilege)
+      throw new ForbiddenException("You don't have privileges");
 
     return true;
   }

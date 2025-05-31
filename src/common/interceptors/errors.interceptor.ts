@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ExceptionMessage } from '../enums';
 
 @Injectable()
 export class ErrorsInterceptor implements NestInterceptor {
@@ -16,9 +15,7 @@ export class ErrorsInterceptor implements NestInterceptor {
       .handle()
       .pipe(
         catchError((err) =>
-          throwError(
-            () => new BadGatewayException(ExceptionMessage.BAD_GATEWAY),
-          ),
+          throwError(() => new BadGatewayException('Bad Gateway')),
         ),
       );
   }

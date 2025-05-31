@@ -1,22 +1,30 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { SortOrder } from 'mongoose';
+import { SortOptions } from '../enums/sort-options.enum';
 
 export class PaginationDto {
+  @ApiPropertyOptional({ default: 10 })
   @IsInt()
-  @Min(1)
+  @Min(1) // Asegura que el usuario no pueda pedir menos de 1 elemento por página (no tiene sentido pedir 0 o menos).
   @IsOptional()
-  limit?: number;
+  limit?: number = 10;
 
+  @ApiPropertyOptional({ default: 0 })
   @IsInt()
-  @Min(1)
+  @Min(0) // Permite empezar desde el primer elemento (índice 0), que es lo correcto para paginación basada en offset.
   @IsOptional()
-  page?: number;
+  offset?: number = 0;
 
-  @IsString()
+  @ApiPropertyOptional({
+    default: SortOptions.CREATED_AT_DESC,
+    enum: SortOptions,
+  })
   @IsOptional()
-  sort?: SortOrder;
+  @IsString()
+  sort?: SortOptions = SortOptions.CREATED_AT_DESC;
 
-  @IsString()
+  @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
   keyWord?: string;
 }

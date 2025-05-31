@@ -7,9 +7,7 @@ import { join } from 'path';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [
-        join(process.cwd(), `/src/config/env/.env.${process.env.NODE_ENV}`),
-      ],
+      envFilePath: [join(process.cwd(), `/.env.${process.env.NODE_ENV}`)],
       isGlobal: true,
       load: [configuration],
       validationSchema,

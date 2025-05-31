@@ -16,10 +16,12 @@ export class DatabaseService implements MongooseOptionsFactory {
   ) {}
 
   createMongooseOptions(): MongooseModuleOptions {
-    const uri = this.configService.get<DatabaseType>('database').uri;
+    const { db_name, db_uri } =
+      this.configService.get<DatabaseType>('database');
 
     return {
-      uri,
+      uri: db_uri,
+      dbName: db_name,
     };
   }
 }

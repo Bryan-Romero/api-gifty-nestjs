@@ -6,3 +6,5 @@
 !tsconfig*.json
 !/src
 !/static
+!.env
+!.env.*

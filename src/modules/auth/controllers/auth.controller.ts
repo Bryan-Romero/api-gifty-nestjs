@@ -6,10 +6,8 @@ import {
   GetUser,
   JwtAuth,
   JwtRefreshAuth,
-  LocalAuth,
 } from 'src/common/decorators';
 import { MessageResDto } from 'src/common/dtos';
-import { UserRequest } from 'src/common/interfaces';
 import { AccessResDto } from '../dto/access-res.dto';
 import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
@@ -33,23 +31,12 @@ export class AuthController {
   }
 
   @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Log in with your credentials',
-    type: AccessResDto,
-  })
-  @LocalAuth()
-  @Post('login')
-  async login(@GetUser() user: UserRequest): Promise<AccessResDto> {
-    return this.authService.login(user);
-  }
-
-  @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Sign up with your credentials',
-    type: AccessResDto,
+    type: MessageResDto,
   })
   @Post('signup')
-  signUp(@Body() signUpDto: SignUpDto): Promise<AccessResDto> {
+  signUp(@Body() signUpDto: SignUpDto): Promise<MessageResDto> {
     return this.authService.signUp(signUpDto);
   }
 

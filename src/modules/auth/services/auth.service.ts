@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
   OnModuleInit,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -10,7 +12,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
 import { MessageResDto } from 'src/common/dtos';
-import { ExceptionMessage, StandardMessage } from 'src/common/enums';
+import { StandardMessage } from 'src/common/enums';
 import { JwtPayload, UserRequest } from 'src/common/interfaces';
 import {
   ConfigurationType,
@@ -23,11 +25,14 @@ import { User, UserModel } from 'src/modules/user/entities/user.entity';
 import { AccessResDto } from '../dto/access-res.dto';
 import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
+import { UserService } from 'src/modules/user/services/user.service';
+import * as ms from 'ms';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   constructor(
     @InjectModel(User.name) private userModel: UserModel,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<ConfigurationType>,
     private readonly bcryptjsService: BcryptjsService,
@@ -40,67 +45,62 @@ export class AuthService implements OnModuleInit {
     // Validate if email exists
     const user = await this.userModel.findOne(
       { email, active: true },
-      {
-        age: true,
-        email: true,
-        username: true,
-        password: true,
-      },
+      '+password',
     );
-    if (!user) throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+    if (!user) throw new ForbiddenException('Invalid credentials');
 
     // Validate password
     const isPasswordValid = await this.bcryptjsService.compareStringHash(
       password,
       user.password,
     );
-    if (!isPasswordValid)
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+    if (!isPasswordValid) throw new ForbiddenException('Invalid credentials');
+
+    if (!user.emailVerified)
+      throw new UnauthorizedException(
+        'Unverified email, please verify your email',
+      );
 
     return await this.accessRes(user);
   }
 
-  async login(user: UserRequest): Promise<AccessResDto> {
-    return await this.accessRes(user);
-  }
+  async signUp(signUpDto: SignUpDto): Promise<MessageResDto> {
+    const { email, username, password, confirmPassword } = signUpDto;
 
-  async signUp(signUpDto: SignUpDto): Promise<AccessResDto> {
-    const { email, username, password } = signUpDto;
+    // Validate if user already exists
+    await this.userService.validateIfUserExists({ email, username });
 
-    // Validate if email already exists
-    const existUser = await this.userModel.findOne({ email });
-    if (existUser)
-      throw new ConflictException(
-        ExceptionMessage.CONFLICT,
-        `User ${existUser.email} already exists`,
+    // Validate if password equals confirmPassword
+    if (password !== confirmPassword)
+      throw new BadRequestException(
+        { confirmPassword: 'Passwords must match' },
+        'Passwords must match',
       );
 
     const hash = await this.bcryptjsService.hashData(password);
-    const emailVerifiedToken = randomUUID();
     const user = await this.userModel.create({
       username,
       email,
       password: hash,
-      emailVerifiedToken,
     });
 
     // send confirmation mail
-    this.mailService.sendUserConfirmation(user, emailVerifiedToken);
+    this.mailService.sendUserConfirmation(user);
 
-    return await this.accessRes(user);
+    return { message: StandardMessage.SUCCESS };
   }
 
   async refreshTokens(_id: string, token: string): Promise<AccessResDto> {
     const user = await this.userModel.findOne({ _id }, '+hashRefreshToken');
     if (!user || !user.hashRefreshToken)
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ForbiddenException('Refresh token not found');
 
     const isRefreshTokenValid = await this.bcryptjsService.compareStringHash(
       token,
       user.hashRefreshToken,
     );
     if (!isRefreshTokenValid)
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ForbiddenException('Refresh token not valid');
 
     return await this.accessRes(user);
   }
@@ -119,9 +119,30 @@ export class AuthService implements OnModuleInit {
     };
   }
 
-  async accessRes(user: Pick<User, '_id' | 'email'>): Promise<AccessResDto> {
-    const { _id, email } = user;
-    const { access_token, refresh_token } = await this.getTokens({
+  async accessRes(
+    user: Pick<
+      User,
+      | '_id'
+      | 'createdAt'
+      | 'updatedAt'
+      | 'active'
+      | 'username'
+      | 'email'
+      | 'emailVerified'
+      | 'roles'
+    >,
+  ): Promise<AccessResDto> {
+    const {
+      _id,
+      createdAt,
+      updatedAt,
+      active,
+      username,
+      email,
+      emailVerified,
+      roles,
+    } = user;
+    const { access_token, refresh_token, expires_in } = await this.getTokens({
       sub: _id.toString(),
       email,
     });
@@ -129,29 +150,43 @@ export class AuthService implements OnModuleInit {
     await this.updateRefreshToken(_id, refresh_token);
 
     return {
-      _id,
-      email,
-      access_token,
-      refresh_token,
+      user: {
+        _id,
+        createdAt,
+        updatedAt,
+        active,
+        username,
+        email,
+        emailVerified,
+        roles,
+      },
+      tokens: {
+        access_token,
+        expires_in,
+        refresh_token,
+      },
     };
   }
 
-  async getTokens(
-    payload: JwtPayload,
-  ): Promise<{ access_token: string; refresh_token: string }> {
-    const { secret_refresh, expires_in_refresh } =
+  async getTokens(payload: JwtPayload): Promise<{
+    access_token: string;
+    expires_in: number;
+    refresh_token: string;
+  }> {
+    const { refresh_secret, refresh_expires_in, expires_in } =
       this.configService.get<JwtType>('jwt');
 
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload),
       this.jwtService.signAsync(payload, {
-        secret: secret_refresh,
-        expiresIn: expires_in_refresh,
+        secret: refresh_secret,
+        expiresIn: refresh_expires_in,
       }),
     ]);
 
     return {
       access_token,
+      expires_in: Date.now() + ms(expires_in), //Date.now() + ms(expires_in) / 1000
       refresh_token,
     };
   }

@@ -10,7 +10,6 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigurationType, JwtType } from 'src/config/configuration.interface';
 import { UserService } from 'src/modules/user/services/user.service';
 import { IS_PUBLIC_KEY } from '../decorators';
-import { ExceptionMessage } from '../enums';
 import { JwtPayload } from '../interfaces';
 import { CustomRequest } from '../interfaces/custom-request.interface';
 
@@ -35,10 +34,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<CustomRequest>();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new ForbiddenException(
-        ExceptionMessage.FORBIDDEN,
-        'Token not found',
-      );
+      throw new ForbiddenException('Invalid token');
     }
     try {
       const { secret } = this.configService.get<JwtType>('jwt');
@@ -55,7 +51,7 @@ export class AuthGuard implements CanActivate {
         username,
       };
     } catch {
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN, 'Invalid token');
+      throw new ForbiddenException('Invalid token');
     }
     return true;
   }

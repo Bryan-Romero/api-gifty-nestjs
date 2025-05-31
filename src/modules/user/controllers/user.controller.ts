@@ -19,6 +19,7 @@ import { FindAllResDto } from '../dto/find-all-res.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { UserService } from '../services/user.service';
+import { ME } from '../dto/me.dto';
 
 @ApiKey()
 @ApiTags('User')
@@ -51,11 +52,11 @@ export class UserController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Get user information authentication',
-    type: User,
+    type: ME,
   })
   @JwtAuth()
   @Get('me')
-  me(@GetUser('_id') _id: string): Promise<User> {
+  me(@GetUser('_id') _id: string): Promise<ME> {
     return this.userService.me(_id);
   }
 

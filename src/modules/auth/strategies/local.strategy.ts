@@ -1,7 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
-import { ExceptionMessage } from 'src/common/enums';
 import { UserRequest } from 'src/common/interfaces';
 import { UserService } from 'src/modules/user/services/user.service';
 
@@ -18,7 +17,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
   async validate(email: string, password: string): Promise<UserRequest> {
     const user = await this.userService.validateUser(email, password);
     if (!user) {
-      throw new ForbiddenException(ExceptionMessage.FORBIDDEN);
+      throw new ForbiddenException('Invalid credentials');
     }
 
     return user;

@@ -10,6 +10,6 @@ export class LoggerMiddleware implements NestMiddleware {
 }
 // Functional middleware
 export function logger(req: Request, res: Response, next: NextFunction) {
-  console.log(`Request...`);
+  console.log('Request...', req.url, req.method, req.headers);
   next();
 }

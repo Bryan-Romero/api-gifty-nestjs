@@ -3,14 +3,12 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
-  HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ConfigurationType } from 'src/config/configuration.interface';
 import { NodeEnv } from 'src/config/node-env.enum';
-import { CustomResponse } from '../interfaces';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -21,34 +19,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
-
     const ctx = host.switchToHttp();
-    var responseBody: CustomResponse<null> = {
-      data: null,
-      statusCode: null,
-      error: null,
-    };
-    var status: number = HttpStatus.INTERNAL_SERVER_ERROR;
 
+    console.log(exception);
     if (this.configService.get<string>('node_env') === NodeEnv.DEVELOPMENT) {
-      console.log(exception);
     }
 
     if (exception instanceof HttpException) {
-      responseBody = {
-        data: null,
-        statusCode: exception.getStatus(),
-        error: exception.getResponse(),
-      };
-      status = exception.getStatus();
+      httpAdapter.reply(
+        ctx.getResponse(),
+        { ...exception },
+        exception.getStatus(),
+      );
     } else {
-      responseBody = {
-        data: null,
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: new InternalServerErrorException().getResponse(),
-      };
+      const err = new InternalServerErrorException(
+        'Something went wrong on the server',
+      );
+      httpAdapter.reply(ctx.getResponse(), { ...err }, err.getStatus());
     }
-
-    httpAdapter.reply(ctx.getResponse(), responseBody, status);
   }
 }
