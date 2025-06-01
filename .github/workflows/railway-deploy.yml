@@ -25,4 +25,4 @@ jobs:
       - name: Deploy latest Docker image to Railway
         env:
           IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest
-        run: railway up --image $IMAGE_NAME
+        run: railway up -- --image $IMAGE_NAME
