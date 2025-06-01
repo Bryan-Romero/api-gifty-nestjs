@@ -34,25 +34,25 @@ jobs:
           railway env set PREFIX: ${{ secrets.PREFIX }}
           railway env set FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
           railway env set JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          railway env set JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
-          railway env set REFRESH_JWT_SECRET: ${{ secrets.REFRESH_JWT_SECRET }}
-          railway env set REFRESH_JWT_EXPIRES_IN: ${{ secrets.REFRESH_JWT_EXPIRES_IN }}
-          railway env set MAIL_JWT_SECRET: ${{ secrets.MAIL_JWT_SECRET }}
-          railway env set MAIL_JWT_EXPIRES_IN: ${{ secrets.MAIL_JWT_EXPIRES_IN }}
-          railway env set PASSWORD_JWT_SECRET: ${{ secrets.PASSWORD_JWT_SECRET }}
-          railway env set PASSWORD_JWT_EXPIRES_IN: ${{ secrets.PASSWORD_JWT_EXPIRES_IN }}
-          railway env set DATABASE_URI: ${{ secrets.DATABASE_URI }}
-          railway env set DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          railway env set DEFAULT_USER_NAME: ${{ secrets.DEFAULT_USER_NAME }}
-          railway env set DEFAULT_USER_ROLE: ${{ secrets.DEFAULT_USER_ROLE }}
-          railway env set DEFAULT_USER_EMAIL: ${{ secrets.DEFAULT_USER_EMAIL }}
-          railway env set DEFAULT_USER_PASSWORD: ${{ secrets.DEFAULT_USER_PASSWORD }}
-          railway env set MAIL_HOST: ${{ secrets.MAIL_HOST }}
-          railway env set MAIL_USER: ${{ secrets.MAIL_USER }}
-          railway env set MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          railway env set MAIL_FROM: ${{ secrets.MAIL_FROM }}
-          railway env set MAIL_PORT: ${{ secrets.MAIL_PORT }}
-          railway env set BCRYPTJS_SALT_ROUNDS: ${{ secrets.BCRYPTJS_SALT_ROUNDS }}
+          railway env set JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
+          railway env set REFRESH_JWT_SECRET=${{ secrets.REFRESH_JWT_SECRET }}
+          railway env set REFRESH_JWT_EXPIRES_IN=${{ secrets.REFRESH_JWT_EXPIRES_IN }}
+          railway env set MAIL_JWT_SECRET=${{ secrets.MAIL_JWT_SECRET }}
+          railway env set MAIL_JWT_EXPIRES_IN=${{ secrets.MAIL_JWT_EXPIRES_IN }}
+          railway env set PASSWORD_JWT_SECRET=${{ secrets.PASSWORD_JWT_SECRET }}
+          railway env set PASSWORD_JWT_EXPIRES_IN=${{ secrets.PASSWORD_JWT_EXPIRES_IN }}
+          railway env set DATABASE_URI=${{ secrets.DATABASE_URI }}
+          railway env set DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+          railway env set DEFAULT_USER_NAME=${{ secrets.DEFAULT_USER_NAME }}
+          railway env set DEFAULT_USER_ROLE=${{ secrets.DEFAULT_USER_ROLE }}
+          railway env set DEFAULT_USER_EMAIL=${{ secrets.DEFAULT_USER_EMAIL }}
+          railway env set DEFAULT_USER_PASSWORD=${{ secrets.DEFAULT_USER_PASSWORD }}
+          railway env set MAIL_HOST=${{ secrets.MAIL_HOST }}
+          railway env set MAIL_USER=${{ secrets.MAIL_USER }}
+          railway env set MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+          railway env set MAIL_FROM=${{ secrets.MAIL_FROM }}
+          railway env set MAIL_PORT=${{ secrets.MAIL_PORT }}
+          railway env set BCRYPTJS_SALT_ROUNDS=${{ secrets.BCRYPTJS_SALT_ROUNDS }}
 
       - name: Deploy latest Docker image to Railway
         env:
