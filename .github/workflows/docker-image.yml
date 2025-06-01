@@ -21,7 +21,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build the Docker image
-        run: docker build \
+        run:
+          docker build \
           --build-arg PORT=${{ secrets.PORT }} \
           --build-arg API_KEY=${{ secrets.API_KEY }} \
           --build-arg PREFIX=${{ secrets.PREFIX }} \
@@ -46,10 +47,12 @@ jobs:
           --build-arg MAIL_FROM=${{ secrets.MAIL_FROM }} \
           --build-arg MAIL_PORT=${{ secrets.MAIL_PORT }} \
           --build-arg BCRYPTJS_SALT_ROUNDS=${{ secrets.BCRYPTJS_SALT_ROUNDS }} \
-          -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} .
-        # github.sha
-        # Esta variable es automática y la proporciona GitHub en cada ejecución de GitHub Actions.
-        # Representa el hash del commit actual, útil para etiquetar imágenes de Docker con un identificador único
+          -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} \
+          .
+          # ▶ Usar --build-arg en docker build (cuando las variables son necesarias solo en construcción)
+          # ▶ github.sha
+          #  ▹ Esta variable es automática y la proporciona GitHub en cada ejecución de GitHub Actions.
+          #  ▹ Representa el hash del commit actual, útil para etiquetar imágenes de Docker con un identificador único
 
       - name: Tag the Docker image
         run: docker tag ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest
