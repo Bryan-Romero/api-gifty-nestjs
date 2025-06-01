@@ -51,14 +51,6 @@ jobs:
         # Esta variable es automática y la proporciona GitHub en cada ejecución de GitHub Actions.
         # Representa el hash del commit actual, útil para etiquetar imágenes de Docker con un identificador único
 
-      - name: Verificar valores de las variables
-        env:
-          PORT: ${{ secrets.PORT }}
-          DATABASE_URI: ${{ secrets.DATABASE_URI }}
-        run: |
-          echo "PORT=${{ secrets.PORT }}"
-          echo "DATABASE_URI=${{ secrets.DATABASE_URI }}"
-
       - name: Tag the Docker image
         run: docker tag ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest
 
