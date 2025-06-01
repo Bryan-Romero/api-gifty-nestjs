@@ -1,0 +1,36 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [main, production]
+  # pull_request:
+  #   branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Load environment variables from file
+        run: cat .env.production >> $GITHUB_ENV
+
+      - name: Build the Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} .
+        # github.sha
+        # Esta variable es automática y la proporciona GitHub en cada ejecución de GitHub Actions.
+        # Representa el hash del commit actual, útil para etiquetar imágenes de Docker con un identificador único
+
+      - name: Tag the Docker image
+        run: docker tag ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest
+
+      - name: Push the Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest
