@@ -8,6 +8,25 @@ ENV DIR=/usr/src/app
 WORKDIR $DIR
 
 ###################
+# BUILD FOR LOCAL DEVELOPMENT
+###################
+FROM base AS development
+
+COPY package*.json $DIR
+COPY tsconfig*.json $DIR
+COPY src $DIR/src
+COPY static $DIR/static
+COPY .env.* $DIR
+
+RUN npm install
+
+EXPOSE ${PORT}
+EXPOSE 9229
+
+CMD ["npm", "run", "start:dev" ]
+
+
+###################
 # BUILD FOR PRODUCTION
 ###################
 FROM base AS build
@@ -52,6 +71,7 @@ COPY --from=build $DIR/node_modules $DIR/node_modules
 COPY --from=build $DIR/dist $DIR/dist
 COPY --from=build $DIR/static $DIR/static
 COPY --from=build $DIR/package*.json $DIR
+COPY --from=build $DIR/.env.${NODE_ENV} $DIR 
 
 EXPOSE ${PORT}
 
