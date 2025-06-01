@@ -71,7 +71,8 @@ COPY --from=build $DIR/node_modules $DIR/node_modules
 COPY --from=build $DIR/dist $DIR/dist
 COPY --from=build $DIR/static $DIR/static
 COPY --from=build $DIR/package*.json $DIR
-COPY --from=build $DIR/.env.${NODE_ENV} $DIR
+# COPY --from=build $DIR/.env.${NODE_ENV} $DIR 
+# No copiar para el GitAction
 
 EXPOSE ${PORT}
 
