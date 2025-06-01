@@ -42,6 +42,9 @@ RUN npm run build && \
 ###################
 FROM base AS production
 
+ARG PORT
+ENV PORT=$PORT
+
 # Valor por defecto, pero puede ser sobrescrito por Compose
 ENV NODE_ENV=production
 # El usuario node ya existe en las imágenes oficiales de Node.js y es un usuario sin privilegios de root.
