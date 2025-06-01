@@ -47,12 +47,8 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           BCRYPTJS_SALT_ROUNDS: ${{ secrets.BCRYPTJS_SALT_ROUNDS }}
         run: |
-          docker build \
-          -f Dockerfile.prod \  # Indica que se usará "Dockerfile.prod"
-          --target production \  # Especifica la etapa de construcción "production"
-          -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} \
-          .
-
+          docker build -f Dockerfile.prod --target production -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} .
+        # github.sha
         # Esta variable es automática y la proporciona GitHub en cada ejecución de GitHub Actions.
         # Representa el hash del commit actual, útil para etiquetar imágenes de Docker con un identificador único
 
