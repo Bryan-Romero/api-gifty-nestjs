@@ -40,6 +40,8 @@ RUN npm run build && \
 # PRODUCTION
 ###################
 FROM base AS production
+# ✅ Si pasas las variables con docker build --build-arg, 
+# necesitas ARG y ENV en el Dockerfile para hacerlas persistentes.
 ARG PORT
 ENV PORT=$PORT
 
