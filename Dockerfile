@@ -78,4 +78,4 @@ EXPOSE ${PORT}
 # Aquí, ${USER} se expande a node, así que tu aplicación no se ejecuta como root, sino como el usuario seguro node.
 USER ${USER}
 
-CMD ["dumb-init", "npm", "run", "start:prod:docker" ]
+CMD ["dumb-init", "npm", "run", "start:prod" ]
