@@ -27,35 +27,32 @@ jobs:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
         run: railway link --service=${{ secrets.RAILWAY_SERVICE_ID }} --project_id=${{ secrets.RAILWAY_PROJECT_ID }} --environment=${{ secrets.RAILWAY_ENVIRONMENT_ID }}
 
-      - name: Definir variables de entorno en Railway
-        run: |
-          railway env set PORT=${{ secrets.PORT }}
-          railway env set API_KEY=${{ secrets.API_KEY }}
-          railway env set PREFIX=${{ secrets.PREFIX }}
-          railway env set FRONTEND_URL=${{ secrets.FRONTEND_URL }}
-          railway env set JWT_SECRET=${{ secrets.JWT_SECRET }}
-          railway env set JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
-          railway env set REFRESH_JWT_SECRET=${{ secrets.REFRESH_JWT_SECRET }}
-          railway env set REFRESH_JWT_EXPIRES_IN=${{ secrets.REFRESH_JWT_EXPIRES_IN }}
-          railway env set MAIL_JWT_SECRET=${{ secrets.MAIL_JWT_SECRET }}
-          railway env set MAIL_JWT_EXPIRES_IN=${{ secrets.MAIL_JWT_EXPIRES_IN }}
-          railway env set PASSWORD_JWT_SECRET=${{ secrets.PASSWORD_JWT_SECRET }}
-          railway env set PASSWORD_JWT_EXPIRES_IN=${{ secrets.PASSWORD_JWT_EXPIRES_IN }}
-          railway env set DATABASE_URI=${{ secrets.DATABASE_URI }}
-          railway env set DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-          railway env set DEFAULT_USER_NAME=${{ secrets.DEFAULT_USER_NAME }}
-          railway env set DEFAULT_USER_ROLE=${{ secrets.DEFAULT_USER_ROLE }}
-          railway env set DEFAULT_USER_EMAIL=${{ secrets.DEFAULT_USER_EMAIL }}
-          railway env set DEFAULT_USER_PASSWORD=${{ secrets.DEFAULT_USER_PASSWORD }}
-          railway env set MAIL_HOST=${{ secrets.MAIL_HOST }}
-          railway env set MAIL_USER=${{ secrets.MAIL_USER }}
-          railway env set MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
-          railway env set MAIL_FROM=${{ secrets.MAIL_FROM }}
-          railway env set MAIL_PORT=${{ secrets.MAIL_PORT }}
-          railway env set BCRYPTJS_SALT_ROUNDS=${{ secrets.BCRYPTJS_SALT_ROUNDS }}
-
       - name: Deploy latest Docker image to Railway
         env:
+          PORT: ${{ secrets.PORT }}
+          API_KEY: ${{ secrets.API_KEY }}
+          PREFIX: ${{ secrets.PREFIX }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
+          REFRESH_JWT_SECRET: ${{ secrets.REFRESH_JWT_SECRET }}
+          REFRESH_JWT_EXPIRES_IN: ${{ secrets.REFRESH_JWT_EXPIRES_IN }}
+          MAIL_JWT_SECRET: ${{ secrets.MAIL_JWT_SECRET }}
+          MAIL_JWT_EXPIRES_IN: ${{ secrets.MAIL_JWT_EXPIRES_IN }}
+          PASSWORD_JWT_SECRET: ${{ secrets.PASSWORD_JWT_SECRET }}
+          PASSWORD_JWT_EXPIRES_IN: ${{ secrets.PASSWORD_JWT_EXPIRES_IN }}
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DEFAULT_USER_NAME: ${{ secrets.DEFAULT_USER_NAME }}
+          DEFAULT_USER_ROLE: ${{ secrets.DEFAULT_USER_ROLE }}
+          DEFAULT_USER_EMAIL: ${{ secrets.DEFAULT_USER_EMAIL }}
+          DEFAULT_USER_PASSWORD: ${{ secrets.DEFAULT_USER_PASSWORD }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          BCRYPTJS_SALT_ROUNDS: ${{ secrets.BCRYPTJS_SALT_ROUNDS }}
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
           # El RAILWAY_API_TOKEN es clave para autenticar tu GitHub Actions con Railway y
           # permitir que los comandos CLI, como railway up o railway redeploy,
