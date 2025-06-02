@@ -20,6 +20,9 @@ jobs:
       - name: Authenticate Railway CLI
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          # El RAILWAY_API_TOKEN es clave para autenticar tu GitHub Actions con Railway y
+          # permitir que los comandos CLI, como railway up, railway redeploy o tros,
+          # puedan ejecutarse sin problemas.
         run: railway whoami
 
       - name: Link Railway project
@@ -54,7 +57,4 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           BCRYPTJS_SALT_ROUNDS: ${{ secrets.BCRYPTJS_SALT_ROUNDS }}
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
-          # El RAILWAY_API_TOKEN es clave para autenticar tu GitHub Actions con Railway y
-          # permitir que los comandos CLI, como railway up o railway redeploy,
-          # puedan ejecutarse sin problemas.
         run: railway redeploy --yes
