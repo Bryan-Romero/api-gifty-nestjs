@@ -112,7 +112,6 @@ ENV MAIL_PORT=$MAIL_PORT
 ARG BCRYPTJS_SALT_ROUNDS
 ENV BCRYPTJS_SALT_ROUNDS=$BCRYPTJS_SALT_ROUNDS
 
-
 # Valor por defecto, pero puede ser sobrescrito por Compose
 ENV NODE_ENV=production
 # El usuario node ya existe en las imágenes oficiales de Node.js y es un usuario sin privilegios de root.
