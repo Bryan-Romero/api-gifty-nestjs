@@ -16,6 +16,7 @@ import { MessageResDto, PaginationDto } from 'src/common/dtos';
 import { FindAllFavsResDto } from './dto/find-all-favs-res.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Favorite } from './entities/favorite.entity';
+import { FindsGifsIdsResDto } from './dto/finds-gifs-ids-res.dto';
 
 @ApiKey()
 @ApiTags('Favorites')
@@ -39,16 +40,40 @@ export class FavoritesController {
 
   @ApiResponse({
     status: HttpStatus.OK,
+    description: 'Get all IDs favorites',
+    type: Array<string>,
+  })
+  @JwtAuth()
+  @Get()
+  findAllIDsFavs(@GetUser('_id') userId: string): Promise<Array<string>> {
+    return this.favoritesService.findAllIDsFavs(userId);
+  }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Get all gifId pagination',
+    type: FindsGifsIdsResDto,
+  })
+  @JwtAuth()
+  @Get('pagination-gifId')
+  findsGifsIds(
+    @GetUser('_id') userId: string,
+    @Query() paginationDto: PaginationDto,
+  ): Promise<FindsGifsIdsResDto> {
+    return this.favoritesService.findsGifsIds(userId, paginationDto);
+  }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
     description: 'Get all favorites',
     type: FindAllFavsResDto,
   })
   @JwtAuth()
-  @Get()
+  @Get('pagination')
   findAllFavs(
-    @GetUser('_id') userId: string,
     @Query() paginationDto: PaginationDto,
   ): Promise<FindAllFavsResDto> {
-    return this.favoritesService.findAllFavs(userId, paginationDto);
+    return this.favoritesService.findAllFavs(paginationDto);
   }
 
   @ApiResponse({

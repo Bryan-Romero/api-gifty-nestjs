@@ -16,11 +16,11 @@ export class UserAccessResDto extends PickType(User, [
   @ApiProperty({ type: String })
   _id: Types.ObjectId;
 
-  @ApiProperty({ type: Date })
-  createdAt: Date;
+  @ApiProperty({ type: String })
+  createdAt: String;
 
-  @ApiProperty({ type: Date })
-  updatedAt: Date;
+  @ApiProperty({ type: String })
+  updatedAt: String;
 
   @ApiProperty({ type: Boolean })
   active: boolean;

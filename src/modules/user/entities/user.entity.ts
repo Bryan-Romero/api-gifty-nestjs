@@ -6,8 +6,8 @@ import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
 @Schema({ timestamps: true })
 export class User {
   _id: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: String;
+  updatedAt: String;
 
   @Prop({ type: Boolean, default: true, select: false })
   active: boolean;

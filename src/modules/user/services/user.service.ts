@@ -4,17 +4,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PipelineStage, ProjectionType } from 'mongoose';
+import { ProjectionType } from 'mongoose';
 import { MessageResDto, PaginationDto } from 'src/common/dtos';
-import { Role, StandardMessage } from 'src/common/enums';
+import { StandardMessage } from 'src/common/enums';
 import { UserRequest } from 'src/common/interfaces';
 import { generateRandomPassword } from 'src/common/utils/generate-random-pass';
 import { BcryptjsService } from 'src/modules/bcryptjs/bcryptjs.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { FindAllResDto } from '../dto/find-all-res.dto';
+import { ME } from '../dto/me.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User, UserDocument, UserModel } from '../entities/user.entity';
-import { ME } from '../dto/me.dto';
 
 @Injectable()
 export class UserService {
@@ -51,8 +51,12 @@ export class UserService {
   async findAll(paginationDto: PaginationDto): Promise<FindAllResDto> {
     return {
       data: [],
-      total_items: 0,
-      total_pages: 0,
+      pagination: {
+        total_items: 0,
+        total_pages: 0,
+        items: 0,
+        offset: 0,
+      },
     };
   }
 
