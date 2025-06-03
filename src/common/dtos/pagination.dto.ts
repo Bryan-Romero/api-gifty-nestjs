@@ -16,12 +16,12 @@ export class PaginationDto {
   offset?: number = 0;
 
   @ApiPropertyOptional({
-    default: SortOptions.CREATED_AT_DESC,
+    default: SortOptions.UPDATED_AT_DESC,
     enum: SortOptions,
   })
   @IsOptional()
   @IsString()
-  sort?: SortOptions = SortOptions.CREATED_AT_DESC;
+  sort?: SortOptions = SortOptions.UPDATED_AT_DESC;
 
   @ApiPropertyOptional()
   @IsOptional()
