@@ -15,7 +15,7 @@ services:
   mongo:
     image: mongo:latest
     container_name: mymongodb
-    restart: always
+    # restart: always
     ports:
       - 27017:27017
     volumes:

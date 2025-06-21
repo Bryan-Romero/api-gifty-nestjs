@@ -70,7 +70,6 @@ COPY --from=build /usr/bin/dumb-init /usr/bin/dumb-init
 COPY --from=build $DIR/node_modules $DIR/node_modules
 COPY --from=build $DIR/dist $DIR/dist
 COPY --from=build $DIR/static $DIR/static
-COPY --from=build $DIR/package*.json $DIR
 COPY --from=build $DIR/.env.${NODE_ENV} $DIR 
 
 EXPOSE ${PORT}
@@ -78,4 +77,4 @@ EXPOSE ${PORT}
 # Aquí, ${USER} se expande a node, así que tu aplicación no se ejecuta como root, sino como el usuario seguro node.
 USER ${USER}
 
-CMD ["dumb-init", "npm", "run", "start:prod" ]
+CMD ["dumb-init", "node", "dist/main" ]

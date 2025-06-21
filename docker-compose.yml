@@ -1,7 +1,10 @@
 services:
   development:
     container_name: api-gifty-nestjs-dev
-    restart: unless-stopped
+    # restart: unless-stopped
+    # - always: el contenedor se reinicia siempre, incluso si se cayó por error o si reinicias la máquina.
+    # - unless-stopped: se reinicia automáticamente solo si tú no lo detuviste manualmente (docker stop). Ideal para dev.
+    # - no: no se reinicia solo.
     build:
       dockerfile: Dockerfile
       context: .
@@ -18,7 +21,7 @@ services:
   mongo:
     image: mongo:latest
     container_name: mymongodb
-    restart: always
+    # restart: always
     ports:
       - 27017:27017
     volumes:
