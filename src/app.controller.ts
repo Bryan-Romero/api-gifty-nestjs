@@ -13,11 +13,11 @@ export class AppController {
 
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Hello World!',
+    description: 'Health message',
     type: String,
   })
   @Get()
   async getHello(): Promise<string> {
-    return await this.appService.getHello();
+    return await this.appService.getHealthMessage();
   }
 }
