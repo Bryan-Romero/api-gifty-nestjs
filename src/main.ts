@@ -61,7 +61,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // Listen
-  console.log('Environment: ', node_env);
+  console.log('Node env: ', node_env);
   console.log('Server listening on port: ', port);
   await app.listen(port);
 }
