@@ -32,4 +32,7 @@ volumes:
   node_modules:
 
   # docker-compose --env-file .env.development up -d -V --build
+  # docker-compose --env-file .env.development stop
+
   # docker-compose -f docker-compose.prod.yml --env-file .env.production up -d -V --build
+  # docker-compose -f docker-compose.prod.yml --env-file .env.production stop
