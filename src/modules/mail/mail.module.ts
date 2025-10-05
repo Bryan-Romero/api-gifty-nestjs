@@ -21,7 +21,7 @@ import { MailService } from './mail.service';
           transport: {
             host: mail.host,
             port: mail.port,
-            secure: false,
+            secure: mail.port === 465,
             auth: {
               user: mail.user,
               pass: mail.password,
