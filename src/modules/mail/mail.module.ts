@@ -17,6 +17,14 @@ import { MailService } from './mail.service';
       inject: [ConfigService],
       useFactory: async (config: ConfigService<ConfigurationType>) => {
         const mail = config.get<MailType>('mail');
+        // 🔍 DEBUG: Log para verificar configuración en Render
+        console.log('=== MAIL CONFIGURATION ===');
+        console.log('Host:', mail.host);
+        console.log('Port:', mail.port, 'Type:', typeof mail.port);
+        console.log('User:', mail.user);
+        console.log('From:', mail.from);
+        console.log('Secure:', mail.port === 465);
+        console.log('========================');
         return {
           transport: {
             host: mail.host,
