@@ -21,7 +21,7 @@ import { MailService } from './mail.service';
           transport: {
             host: mail.host,
             port: mail.port,
-            secure: mail.port === 465, // Cambiar a true si usas el puerto 465
+            secure: false, // Cambiar a true si usas el puerto 465
             socketTimeout: 60000, // 60 segundos
             auth: {
               user: mail.user,
