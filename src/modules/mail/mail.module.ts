@@ -17,19 +17,11 @@ import { MailService } from './mail.service';
       inject: [ConfigService],
       useFactory: async (config: ConfigService<ConfigurationType>) => {
         const mail = config.get<MailType>('mail');
-        // 🔍 DEBUG: Log para verificar configuración en Render
-        console.log('=== MAIL CONFIGURATION ===');
-        console.log('Host:', mail.host);
-        console.log('Port:', mail.port, 'Type:', typeof mail.port);
-        console.log('User:', mail.user);
-        console.log('From:', mail.from);
-        console.log('Secure:', mail.port === 465);
-        console.log('========================');
         return {
           transport: {
             host: mail.host,
             port: mail.port,
-            secure: Number(mail.port) === 465, // Cambiar a true si usas el puerto 465
+            secure: mail.port === 465, // Cambiar a true si usas el puerto 465
             socketTimeout: 60000, // 60 segundos
             auth: {
               user: mail.user,
