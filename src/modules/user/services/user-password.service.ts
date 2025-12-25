@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  HttpException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { MessageResDto } from 'src/common/dtos';
@@ -12,7 +7,6 @@ import { JwtForgotPassPayload } from 'src/common/interfaces';
 import { ConfigurationType, JwtType } from 'src/config/configuration.interface';
 import { BcryptjsService } from 'src/modules/bcryptjs/bcryptjs.service';
 import { MailService } from 'src/modules/mail/mail.service';
-import { User } from 'src/modules/user/entities/user.entity';
 import { UserService } from 'src/modules/user/services/user.service';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';

@@ -99,7 +99,7 @@ export class FavoritesService {
     }
 
     // Convertir el sort del enum a formato Mongoose
-    let sortOption: any = {};
+    const sortOption: any = {};
     if (typeof sort === 'string') {
       if (sort.startsWith('-')) {
         sortOption[sort.substring(1)] = -1;
@@ -152,7 +152,7 @@ export class FavoritesService {
     }
 
     // Convertir el sort del enum a formato Mongoose
-    let sortOption: any = {};
+    const sortOption: any = {};
     if (typeof sort === 'string') {
       if (sort.startsWith('-')) {
         sortOption[sort.substring(1)] = -1;

@@ -6,5 +6,5 @@ export class AddFavoriteDto extends PickType(Favorite, ['gifId'] as const) {
   @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
-  gifId: String;
+  gifId: string;
 }

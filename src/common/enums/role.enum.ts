@@ -4,7 +4,7 @@ export enum Role {
   GEST = 'GEST',
 }
 
-export const RoleLevel: Record<Role, Number> = {
+export const RoleLevel: Record<Role, number> = {
   [Role.ADMIN]: 3,
   [Role.USER]: 2,
   [Role.GEST]: 1,

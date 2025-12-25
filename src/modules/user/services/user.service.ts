@@ -49,6 +49,7 @@ export class UserService {
   }
 
   async findAll(paginationDto: PaginationDto): Promise<FindAllResDto> {
+    console.log('🚀 ~ UserService ~ findAll ~ paginationDto:', paginationDto);
     return {
       data: [],
       pagination: {

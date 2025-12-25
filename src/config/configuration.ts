@@ -7,6 +7,7 @@ export const configuration = (): ConfigurationType => ({
   prefix: process.env.PREFIX,
   api_key: process.env.API_KEY,
   frontend_url: process.env.FRONTEND_URL,
+  bcryptjs_salt_rounds: parseInt(process.env.BCRYPTJS_SALT_ROUNDS, 10),
   jwt: {
     secret: process.env.JWT_SECRET,
     expires_in: process.env.JWT_EXPIRES_IN,
@@ -34,7 +35,6 @@ export const configuration = (): ConfigurationType => ({
     from: process.env.MAIL_FROM,
     port: parseInt(process.env.MAIL_PORT, 10),
   },
-  bcryptjs_salt_rounds: parseInt(process.env.BCRYPTJS_SALT_ROUNDS, 10),
 });
 
 // https://dev.to/pitops/managing-multiple-environments-in-nestjs-71l

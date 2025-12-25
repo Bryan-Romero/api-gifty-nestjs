@@ -17,10 +17,10 @@ export class ME extends PickType(User, [
   _id: Types.ObjectId;
 
   @ApiProperty({ type: String })
-  createdAt: String;
+  createdAt: string;
 
   @ApiProperty({ type: String })
-  updatedAt: String;
+  updatedAt: string;
 
   @ApiProperty({ type: Boolean })
   active: boolean;

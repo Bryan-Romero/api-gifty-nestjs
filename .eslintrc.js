@@ -1,3 +1,5 @@
+const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommended');
+
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -8,7 +10,7 @@ module.exports = {
   plugins: ['@typescript-eslint/eslint-plugin'],
   extends: [
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
+    eslintPluginPrettierRecommended,
   ],
   root: true,
   env: {

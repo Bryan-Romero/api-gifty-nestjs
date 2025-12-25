@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   OnModuleInit,
@@ -9,11 +8,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
 import { MessageResDto } from 'src/common/dtos';
 import { StandardMessage } from 'src/common/enums';
-import { JwtPayload, UserRequest } from 'src/common/interfaces';
+import { JwtPayload } from 'src/common/interfaces';
 import {
   ConfigurationType,
   DefaultUserType,
