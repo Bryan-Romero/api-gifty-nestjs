@@ -10,8 +10,7 @@ export function generateRandomPassword(passwordLength: number): string {
   const digits = '0123456789';
   const specialCharacters = '@$!%*?&';
 
-  const allCharacters =
-    lowercaseLetters + uppercaseLetters + digits + specialCharacters;
+  const allCharacters = lowercaseLetters + uppercaseLetters + digits + specialCharacters;
 
   let password = '';
 

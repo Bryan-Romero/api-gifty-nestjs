@@ -1,12 +1,7 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost } from '@nestjs/core';
+
 import { ConfigurationType } from 'src/config/configuration.interface';
 import { NodeEnv } from 'src/config/node-env.enum';
 
@@ -26,15 +21,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     if (exception instanceof HttpException) {
-      httpAdapter.reply(
-        ctx.getResponse(),
-        { ...exception },
-        exception.getStatus(),
-      );
+      httpAdapter.reply(ctx.getResponse(), { ...exception }, exception.getStatus());
     } else {
-      const err = new InternalServerErrorException(
-        'Something went wrong on the server',
-      );
+      const err = new InternalServerErrorException('Something went wrong on the server');
       httpAdapter.reply(ctx.getResponse(), { ...err }, err.getStatus());
     }
   }

@@ -1,18 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ProjectionType } from 'mongoose';
+
+import { FilterQuery, ProjectionType, SortOrder } from 'mongoose';
 import { MessageResDto, PaginationDto } from 'src/common/dtos';
 import { StandardMessage } from 'src/common/enums';
 import { SortOptions } from 'src/common/enums/sort-options.enum';
+
 import { User, UserModel } from '../user/entities/user.entity';
 import { AddFavoriteDto } from './dto/create-favorite.dto';
 import { FindAllFavsResDto } from './dto/find-all-favs-res.dto';
-import {
-  Favorite,
-  FavoriteDocument,
-  FavoriteModel,
-} from './entities/favorite.entity';
 import { FindsGifsIdsResDto } from './dto/finds-gifs-ids-res.dto';
+import { Favorite, FavoriteDocument, FavoriteModel } from './entities/favorite.entity';
 
 @Injectable()
 export class FavoritesService {
@@ -21,10 +19,7 @@ export class FavoritesService {
     @InjectModel(User.name) private userModel: UserModel,
   ) {}
 
-  async addFav(
-    userId: string,
-    addFavoriteDto: AddFavoriteDto,
-  ): Promise<MessageResDto> {
+  async addFav(userId: string, addFavoriteDto: AddFavoriteDto): Promise<MessageResDto> {
     const { gifId } = addFavoriteDto;
 
     // Buscar si existe
@@ -67,28 +62,17 @@ export class FavoritesService {
 
     // Busca todos los favoritos activos del usuario y solo trae el campo gifId
     const favorites = await this.favoriteModel
-      .find(
-        { user: userId, active: true },
-        { gifId: 1, _id: -1, createdAt: -1, updatedAt: -1, user: -1 },
-      )
+      .find({ user: userId, active: true }, { gifId: 1, _id: -1, createdAt: -1, updatedAt: -1, user: -1 })
       .lean();
 
     // Extrae solo los gifId en un array de strings
     return favorites.map((fav) => fav.gifId as string);
   }
 
-  async findsGifsIds(
-    userId: string,
-    paginationDto: PaginationDto,
-  ): Promise<FindsGifsIdsResDto> {
-    const {
-      limit = 10,
-      offset = 0,
-      sort = SortOptions.UPDATED_AT_DESC,
-      keyWord,
-    } = paginationDto;
+  async findsGifsIds(userId: string, paginationDto: PaginationDto): Promise<FindsGifsIdsResDto> {
+    const { limit = 10, offset = 0, sort = SortOptions.UPDATED_AT_DESC, keyWord } = paginationDto;
     // Construir el filtro base: favoritos activos del usuario
-    const filter: any = { user: userId, active: true };
+    const filter: FilterQuery<Favorite> = { user: userId, active: true };
 
     // Si hay búsqueda por palabra clave, agregar filtro por nombre (ajusta el campo según tu modelo)
     if (keyWord) {
@@ -99,7 +83,7 @@ export class FavoritesService {
     }
 
     // Convertir el sort del enum a formato Mongoose
-    const sortOption: any = {};
+    const sortOption: string | { [key: string]: SortOrder | { $meta: any } } | [string, SortOrder][] = {};
     if (typeof sort === 'string') {
       if (sort.startsWith('-')) {
         sortOption[sort.substring(1)] = -1;
@@ -115,12 +99,7 @@ export class FavoritesService {
     const total_pages = Math.ceil(total_items / limit);
 
     // Obtener los favoritos paginados y ordenados
-    const data = await this.favoriteModel
-      .find(filter, { gifId: 1 })
-      .sort(sortOption)
-      .skip(offset)
-      .limit(limit)
-      .lean();
+    const data = await this.favoriteModel.find(filter, { gifId: 1 }).sort(sortOption).skip(offset).limit(limit).lean();
 
     return {
       data: data.map((fav) => fav.gifId) || [],
@@ -134,14 +113,9 @@ export class FavoritesService {
   }
 
   async findAllFavs(paginationDto: PaginationDto): Promise<FindAllFavsResDto> {
-    const {
-      limit = 10,
-      offset = 0,
-      sort = SortOptions.UPDATED_AT_DESC,
-      keyWord,
-    } = paginationDto;
+    const { limit = 10, offset = 0, sort = SortOptions.UPDATED_AT_DESC, keyWord } = paginationDto;
     // Construir el filtro base: favoritos activos del usuario
-    const filter: any = { active: true };
+    const filter: FilterQuery<Favorite> = { active: true };
 
     // Si hay búsqueda por palabra clave, agregar filtro por nombre (ajusta el campo según tu modelo)
     if (keyWord) {
@@ -152,7 +126,7 @@ export class FavoritesService {
     }
 
     // Convertir el sort del enum a formato Mongoose
-    const sortOption: any = {};
+    const sortOption: string | [string, SortOrder][] | { [key: string]: SortOrder | { $meta: any } } = {};
     if (typeof sort === 'string') {
       if (sort.startsWith('-')) {
         sortOption[sort.substring(1)] = -1;
@@ -168,12 +142,7 @@ export class FavoritesService {
     const total_pages = Math.ceil(total_items / limit);
 
     // Obtener los favoritos paginados y ordenados
-    const data = await this.favoriteModel
-      .find(filter)
-      .sort(sortOption)
-      .skip(offset)
-      .limit(limit)
-      .lean();
+    const data = await this.favoriteModel.find(filter).sort(sortOption).skip(offset).limit(limit).lean();
 
     return {
       data,
@@ -191,10 +160,7 @@ export class FavoritesService {
   }
 
   async updateFav(userId: string, id: string): Promise<MessageResDto> {
-    await this.favoriteModel.findOneAndUpdate(
-      { gifId: id, user: userId },
-      { active: false },
-    );
+    await this.favoriteModel.findOneAndUpdate({ gifId: id, user: userId }, { active: false });
 
     return { message: StandardMessage.SUCCESS };
   }
@@ -204,13 +170,9 @@ export class FavoritesService {
     projection?: ProjectionType<Favorite>,
     whitException = true,
   ): Promise<FavoriteDocument> {
-    const favorite = await this.favoriteModel.findOne(
-      { _id, active: true },
-      projection,
-    );
+    const favorite = await this.favoriteModel.findOne({ _id, active: true }, projection);
 
-    if (!favorite && whitException)
-      throw new NotFoundException(`Favorite with _id ${_id} does not exist`);
+    if (!favorite && whitException) throw new NotFoundException(`Favorite with _id ${_id} does not exist`);
 
     return favorite || null;
   }

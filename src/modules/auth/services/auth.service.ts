@@ -8,23 +8,21 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
+
 import { Types } from 'mongoose';
+import * as ms from 'ms';
 import { MessageResDto } from 'src/common/dtos';
 import { StandardMessage } from 'src/common/enums';
 import { JwtPayload } from 'src/common/interfaces';
-import {
-  ConfigurationType,
-  DefaultUserType,
-  JwtType,
-} from 'src/config/configuration.interface';
+import { ConfigurationType, DefaultUserType, JwtType } from 'src/config/configuration.interface';
 import { BcryptjsService } from 'src/modules/bcryptjs/bcryptjs.service';
 import { MailService } from 'src/modules/mail/mail.service';
 import { User, UserModel } from 'src/modules/user/entities/user.entity';
+import { UserService } from 'src/modules/user/services/user.service';
+
 import { AccessResDto } from '../dto/access-res.dto';
 import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
-import { UserService } from 'src/modules/user/services/user.service';
-import * as ms from 'ms';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -41,23 +39,14 @@ export class AuthService implements OnModuleInit {
     const { email, password } = signInDto;
 
     // Validate if email exists
-    const user = await this.userModel.findOne(
-      { email, active: true },
-      '+password',
-    );
+    const user = await this.userModel.findOne({ email, active: true }, '+password');
     if (!user) throw new ForbiddenException('Invalid credentials');
 
     // Validate password
-    const isPasswordValid = await this.bcryptjsService.compareStringHash(
-      password,
-      user.password,
-    );
+    const isPasswordValid = await this.bcryptjsService.compareStringHash(password, user.password);
     if (!isPasswordValid) throw new ForbiddenException('Invalid credentials');
 
-    if (!user.emailVerified)
-      throw new UnauthorizedException(
-        'Unverified email, please verify your email',
-      );
+    if (!user.emailVerified) throw new UnauthorizedException('Unverified email, please verify your email');
 
     return await this.accessRes(user);
   }
@@ -70,10 +59,7 @@ export class AuthService implements OnModuleInit {
 
     // Validate if password equals confirmPassword
     if (password !== confirmPassword)
-      throw new BadRequestException(
-        { confirmPassword: 'Passwords must match' },
-        'Passwords must match',
-      );
+      throw new BadRequestException({ confirmPassword: 'Passwords must match' }, 'Passwords must match');
 
     const hash = await this.bcryptjsService.hashData(password);
     const user = await this.userModel.create({
@@ -83,22 +69,17 @@ export class AuthService implements OnModuleInit {
     });
 
     // send confirmation mail
-    this.mailService.sendUserConfirmation(user);
+    await this.mailService.sendUserConfirmation(user);
 
     return { message: StandardMessage.SUCCESS };
   }
 
   async refreshTokens(_id: string, token: string): Promise<AccessResDto> {
     const user = await this.userModel.findOne({ _id }, '+hashRefreshToken');
-    if (!user || !user.hashRefreshToken)
-      throw new ForbiddenException('Refresh token not found');
+    if (!user || !user.hashRefreshToken) throw new ForbiddenException('Refresh token not found');
 
-    const isRefreshTokenValid = await this.bcryptjsService.compareStringHash(
-      token,
-      user.hashRefreshToken,
-    );
-    if (!isRefreshTokenValid)
-      throw new ForbiddenException('Refresh token not valid');
+    const isRefreshTokenValid = await this.bcryptjsService.compareStringHash(token, user.hashRefreshToken);
+    if (!isRefreshTokenValid) throw new ForbiddenException('Refresh token not valid');
 
     return await this.accessRes(user);
   }
@@ -118,28 +99,9 @@ export class AuthService implements OnModuleInit {
   }
 
   async accessRes(
-    user: Pick<
-      User,
-      | '_id'
-      | 'createdAt'
-      | 'updatedAt'
-      | 'active'
-      | 'username'
-      | 'email'
-      | 'emailVerified'
-      | 'roles'
-    >,
+    user: Pick<User, '_id' | 'createdAt' | 'updatedAt' | 'active' | 'username' | 'email' | 'emailVerified' | 'roles'>,
   ): Promise<AccessResDto> {
-    const {
-      _id,
-      createdAt,
-      updatedAt,
-      active,
-      username,
-      email,
-      emailVerified,
-      roles,
-    } = user;
+    const { _id, createdAt, updatedAt, active, username, email, emailVerified, roles } = user;
     const { access_token, refresh_token, expires_in } = await this.getTokens({
       sub: _id.toString(),
       email,
@@ -171,8 +133,7 @@ export class AuthService implements OnModuleInit {
     expires_in: number;
     refresh_token: string;
   }> {
-    const { refresh_secret, refresh_expires_in, expires_in } =
-      this.configService.get<JwtType>('jwt');
+    const { refresh_secret, refresh_expires_in, expires_in } = this.configService.get<JwtType>('jwt');
 
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload),
@@ -199,8 +160,7 @@ export class AuthService implements OnModuleInit {
   }
 
   private async createDefaultUser(): Promise<void> {
-    const { email, password, username, role } =
-      this.configService.get<DefaultUserType>('default_user');
+    const { email, password, username, role } = this.configService.get<DefaultUserType>('default_user');
 
     const existingUser = await this.userModel.findOne({
       email,

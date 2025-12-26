@@ -1,21 +1,14 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Query,
-  HttpStatus,
-} from '@nestjs/common';
-import { FavoritesService } from './favorites.service';
-import { AddFavoriteDto } from './dto/create-favorite.dto';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import { ApiKey, GetUser, JwtAuth } from 'src/common/decorators';
 import { MessageResDto, PaginationDto } from 'src/common/dtos';
+
+import { AddFavoriteDto } from './dto/create-favorite.dto';
 import { FindAllFavsResDto } from './dto/find-all-favs-res.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Favorite } from './entities/favorite.entity';
 import { FindsGifsIdsResDto } from './dto/finds-gifs-ids-res.dto';
+import { Favorite } from './entities/favorite.entity';
+import { FavoritesService } from './favorites.service';
 
 @ApiKey()
 @ApiTags('Favorites')
@@ -30,10 +23,7 @@ export class FavoritesController {
   })
   @JwtAuth()
   @Post()
-  addFav(
-    @GetUser('_id') userId: string,
-    @Body() addFavoriteDto: AddFavoriteDto,
-  ): Promise<MessageResDto> {
+  addFav(@GetUser('_id') userId: string, @Body() addFavoriteDto: AddFavoriteDto): Promise<MessageResDto> {
     return this.favoritesService.addFav(userId, addFavoriteDto);
   }
 
@@ -55,10 +45,7 @@ export class FavoritesController {
   })
   @JwtAuth()
   @Get('pagination-gifId')
-  findsGifsIds(
-    @GetUser('_id') userId: string,
-    @Query() paginationDto: PaginationDto,
-  ): Promise<FindsGifsIdsResDto> {
+  findsGifsIds(@GetUser('_id') userId: string, @Query() paginationDto: PaginationDto): Promise<FindsGifsIdsResDto> {
     return this.favoritesService.findsGifsIds(userId, paginationDto);
   }
 
@@ -69,9 +56,7 @@ export class FavoritesController {
   })
   @JwtAuth()
   @Get('pagination')
-  findAllFavs(
-    @Query() paginationDto: PaginationDto,
-  ): Promise<FindAllFavsResDto> {
+  findAllFavs(@Query() paginationDto: PaginationDto): Promise<FindAllFavsResDto> {
     return this.favoritesService.findAllFavs(paginationDto);
   }
 
@@ -93,10 +78,7 @@ export class FavoritesController {
   })
   @JwtAuth()
   @Patch(':id')
-  updateFav(
-    @GetUser('_id') userId: string,
-    @Param('id') id: string,
-  ): Promise<MessageResDto> {
+  updateFav(@GetUser('_id') userId: string, @Param('id') id: string): Promise<MessageResDto> {
     return this.favoritesService.updateFav(userId, id);
   }
 }

@@ -1,10 +1,6 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AllExceptionsFilter } from './common/filters';
@@ -14,9 +10,9 @@ import { MyConfigModule } from './config/my-config.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BcryptjsModule } from './modules/bcryptjs/bcryptjs.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 import { MailModule } from './modules/mail/mail.module';
 import { UserModule } from './modules/user/user.module';
-import { FavoritesModule } from './modules/favorites/favorites.module';
 
 @Module({
   imports: [

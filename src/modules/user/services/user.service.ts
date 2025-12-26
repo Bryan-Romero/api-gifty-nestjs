@@ -1,15 +1,13 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+
 import { ProjectionType } from 'mongoose';
 import { MessageResDto, PaginationDto } from 'src/common/dtos';
 import { StandardMessage } from 'src/common/enums';
 import { UserRequest } from 'src/common/interfaces';
 import { generateRandomPassword } from 'src/common/utils/generate-random-pass';
 import { BcryptjsService } from 'src/modules/bcryptjs/bcryptjs.service';
+
 import { CreateUserDto } from '../dto/create-user.dto';
 import { FindAllResDto } from '../dto/find-all-res.dto';
 import { ME } from '../dto/me.dto';
@@ -102,16 +100,10 @@ export class UserService {
   }
 
   async validateUser(email: string, password: string): Promise<UserRequest> {
-    const user = await this.userModel.findOne(
-      { email, active: true },
-      '+password',
-    );
+    const user = await this.userModel.findOne({ email, active: true }, '+password');
     if (user) {
       // Validate password
-      const isPasswordValid = await this.bcryptjsService.compareStringHash(
-        password,
-        user.password,
-      );
+      const isPasswordValid = await this.bcryptjsService.compareStringHash(password, user.password);
 
       const { _id, roles, username } = user;
       return isPasswordValid ? { _id, email, roles, username } : null;
@@ -120,42 +112,23 @@ export class UserService {
     return null;
   }
 
-  async findUserByEmail(
-    email: string,
-    projection?: ProjectionType<User>,
-    whitException = true,
-  ): Promise<UserDocument> {
-    const user = await this.userModel.findOne(
-      { email, active: true },
-      projection,
-    );
+  async findUserByEmail(email: string, projection?: ProjectionType<User>, whitException = true): Promise<UserDocument> {
+    const user = await this.userModel.findOne({ email, active: true }, projection);
 
-    if (!user && whitException)
-      throw new NotFoundException(`User with email ${email} does not exist`);
+    if (!user && whitException) throw new NotFoundException(`User with email ${email} does not exist`);
 
     return user || null;
   }
 
-  async findUserById(
-    _id: string,
-    projection?: ProjectionType<User>,
-    whitException = true,
-  ): Promise<UserDocument> {
-    const user = await this.userModel.findOne(
-      { _id, active: true },
-      projection,
-    );
+  async findUserById(_id: string, projection?: ProjectionType<User>, whitException = true): Promise<UserDocument> {
+    const user = await this.userModel.findOne({ _id, active: true }, projection);
 
-    if (!user && whitException)
-      throw new NotFoundException(`User with _id ${_id} does not exist`);
+    if (!user && whitException) throw new NotFoundException(`User with _id ${_id} does not exist`);
 
     return user || null;
   }
 
-  async validateIfUserExists({
-    email,
-    username,
-  }: Pick<User, 'username' | 'email'>) {
+  async validateIfUserExists({ email, username }: Pick<User, 'username' | 'email'>) {
     const [userByEmail, userByUsername] = await Promise.all([
       this.userModel.findOne({
         email: { $regex: new RegExp(`^${email}$`, 'i') },

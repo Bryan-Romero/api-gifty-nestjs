@@ -1,7 +1,9 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { User } from '../entities/user.entity';
-import { Role } from 'src/common/enums';
+
 import { Types } from 'mongoose';
+import { Role } from 'src/common/enums';
+
+import { User } from '../entities/user.entity';
 
 export class ME extends PickType(User, [
   '_id',

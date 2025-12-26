@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { Role } from 'src/common/enums';
 import { Favorite } from 'src/modules/favorites/entities/favorite.entity';

@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+
 import { Strategy } from 'passport-local';
 import { UserRequest } from 'src/common/interfaces';
 import { UserService } from 'src/modules/user/services/user.service';

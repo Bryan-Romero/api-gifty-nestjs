@@ -1,25 +1,17 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import { ApiKey, Auth, GetUser, JwtAuth } from 'src/common/decorators';
 import { MessageResDto, PaginationDto } from 'src/common/dtos';
 import { Role } from 'src/common/enums';
 import { ParseObjectIdPipe } from 'src/common/pipes';
+
 import { CreateUserDto } from '../dto/create-user.dto';
 import { FindAllResDto } from '../dto/find-all-res.dto';
+import { ME } from '../dto/me.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { UserService } from '../services/user.service';
-import { ME } from '../dto/me.dto';
 
 @ApiKey()
 @ApiTags('User')
@@ -78,10 +70,7 @@ export class UserController {
   })
   @Auth(Role.USER)
   @Patch(':id')
-  update(
-    @Param('id', ParseObjectIdPipe) id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ): Promise<User> {
+  update(@Param('id', ParseObjectIdPipe) id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
     return this.userService.update(id, updateUserDto);
   }
 

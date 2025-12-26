@@ -1,4 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
+
 import { IsEmail } from 'class-validator';
 import { User } from 'src/modules/user/entities/user.entity';
 

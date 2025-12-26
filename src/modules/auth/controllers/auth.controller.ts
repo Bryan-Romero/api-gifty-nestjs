@@ -1,13 +1,9 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  ApiKey,
-  GetToken,
-  GetUser,
-  JwtAuth,
-  JwtRefreshAuth,
-} from 'src/common/decorators';
+
+import { ApiKey, GetToken, GetUser, JwtAuth, JwtRefreshAuth } from 'src/common/decorators';
 import { MessageResDto } from 'src/common/dtos';
+
 import { AccessResDto } from '../dto/access-res.dto';
 import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
@@ -48,10 +44,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @JwtRefreshAuth()
   @Post('refresh-tokens')
-  refreshTokens(
-    @GetUser('_id') _id: string,
-    @GetToken() token: string,
-  ): Promise<AccessResDto> {
+  refreshTokens(@GetUser('_id') _id: string, @GetToken() token: string): Promise<AccessResDto> {
     return this.authService.refreshTokens(_id, token);
   }
 

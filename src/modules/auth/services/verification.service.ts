@@ -2,11 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
+
 import { MessageResDto } from 'src/common/dtos';
 import { StandardMessage } from 'src/common/enums';
 import { ConfigurationType, JwtType } from 'src/config/configuration.interface';
 import { MailService } from 'src/modules/mail/mail.service';
 import { User, UserModel } from 'src/modules/user/entities/user.entity';
+
 import { EmailVerifiedDto } from '../dto/email-verified.dto';
 import { ResendEmailDto } from '../dto/resend-email.dto';
 
@@ -19,9 +21,7 @@ export class VerificationService {
     private readonly configService: ConfigService<ConfigurationType>,
   ) {}
 
-  async emailVerified(
-    emailVerifiedDto: EmailVerifiedDto,
-  ): Promise<MessageResDto> {
+  async emailVerified(emailVerifiedDto: EmailVerifiedDto): Promise<MessageResDto> {
     try {
       const { token } = emailVerifiedDto;
       const { mail_secret } = this.configService.get<JwtType>('jwt');
@@ -29,24 +29,19 @@ export class VerificationService {
         secret: mail_secret,
       });
       // Busca el usuario por email y márcalo como verificado
-      await this.userModel.updateOne(
-        { email: payload.email },
-        { emailVerified: true },
-      );
+      await this.userModel.updateOne({ email: payload.email }, { emailVerified: true });
       return { message: StandardMessage.SUCCESS };
     } catch (e) {
       throw new BadRequestException('Invalid or expired token');
     }
   }
 
-  async resendVerificationEmail(
-    resendEmailDto: ResendEmailDto,
-  ): Promise<MessageResDto> {
+  async resendVerificationEmail(resendEmailDto: ResendEmailDto): Promise<MessageResDto> {
     const { email } = resendEmailDto;
     const user = await this.userModel.findOne({ email, active: true });
     if (!user) return { message: StandardMessage.SUCCESS };
 
-    this.mailService.sendUserConfirmation(user);
+    await this.mailService.sendUserConfirmation(user);
 
     return {
       message: StandardMessage.SUCCESS,

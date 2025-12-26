@@ -1,4 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
+
 import { Types } from 'mongoose';
 import { Role } from 'src/common/enums';
 import { User } from 'src/modules/user/entities/user.entity';

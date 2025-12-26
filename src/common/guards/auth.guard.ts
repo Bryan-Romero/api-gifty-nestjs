@@ -1,14 +1,11 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+
 import { ConfigurationType, JwtType } from 'src/config/configuration.interface';
 import { UserService } from 'src/modules/user/services/user.service';
+
 import { IS_PUBLIC_KEY } from '../decorators';
 import { JwtPayload } from '../interfaces';
 import { CustomRequest } from '../interfaces/custom-request.interface';

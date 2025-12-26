@@ -1,4 +1,5 @@
 import { Role } from 'src/common/enums';
+
 import { ConfigurationType } from './configuration.interface';
 
 export const configuration = (): ConfigurationType => ({

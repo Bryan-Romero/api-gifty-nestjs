@@ -1,7 +1,8 @@
-import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+
+import { MailerService } from '@nestjs-modules/mailer';
 import { ConfirmEmailContext } from 'src/common/interfaces';
 import { ConfigurationType, JwtType } from 'src/config/configuration.interface';
 import { User } from 'src/modules/user/entities/user.entity';
@@ -59,8 +60,7 @@ export class MailService {
   }
 
   confirmationURL(email: string): string {
-    const { mail_secret, mail_expires_in } =
-      this.configService.get<JwtType>('jwt');
+    const { mail_secret, mail_expires_in } = this.configService.get<JwtType>('jwt');
     const payload = { email };
     const token = this.jwtService.sign(payload, {
       secret: mail_secret,
@@ -73,8 +73,7 @@ export class MailService {
   }
 
   forgotPasswordURL(email: string): string {
-    const { password_secret, password_expires_in } =
-      this.configService.get<JwtType>('jwt');
+    const { password_secret, password_expires_in } = this.configService.get<JwtType>('jwt');
     const payload = { email };
     const token = this.jwtService.sign(payload, {
       secret: password_secret,

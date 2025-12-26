@@ -1,5 +1,6 @@
 import * as Joi from 'joi';
 import { Role } from 'src/common/enums';
+
 import { NodeEnv } from './node-env.enum';
 
 export const validationSchema = Joi.object({

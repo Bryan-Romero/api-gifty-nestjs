@@ -1,7 +1,9 @@
 import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import { ApiKey } from 'src/common/decorators';
 import { MessageResDto } from 'src/common/dtos';
+
 import { EmailVerifiedDto } from '../dto/email-verified.dto';
 import { ResendEmailDto } from '../dto/resend-email.dto';
 import { VerificationService } from '../services/verification.service';
@@ -18,9 +20,7 @@ export class VerificationController {
     type: MessageResDto,
   })
   @Get('email')
-  emailVerified(
-    @Query() emailVerifiedDto: EmailVerifiedDto,
-  ): Promise<MessageResDto> {
+  emailVerified(@Query() emailVerifiedDto: EmailVerifiedDto): Promise<MessageResDto> {
     return this.verificationService.emailVerified(emailVerifiedDto);
   }
 
@@ -30,9 +30,7 @@ export class VerificationController {
     type: MessageResDto,
   })
   @Get('resend-email')
-  resendVerificationEmail(
-    @Query() resendEmailDto: ResendEmailDto,
-  ): Promise<MessageResDto> {
+  resendVerificationEmail(@Query() resendEmailDto: ResendEmailDto): Promise<MessageResDto> {
     return this.verificationService.resendVerificationEmail(resendEmailDto);
   }
 }

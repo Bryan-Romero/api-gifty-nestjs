@@ -1,13 +1,8 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import { MessageResDto } from 'src/common/dtos';
+
 import { ApiKey, GetUser } from '../../../common/decorators';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
@@ -27,9 +22,7 @@ export class UserPasswordController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('forgot')
-  forgotPassword(
-    @Body() forgotPasswordDto: ForgotPasswordDto,
-  ): Promise<MessageResDto> {
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<MessageResDto> {
     return this.passwordService.forgotPassword(forgotPasswordDto);
   }
 
@@ -40,9 +33,7 @@ export class UserPasswordController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('reset')
-  resetPassword(
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ): Promise<MessageResDto> {
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<MessageResDto> {
     return this.passwordService.resetPassword(resetPasswordDto);
   }
 
@@ -52,10 +43,7 @@ export class UserPasswordController {
     type: MessageResDto,
   })
   @Patch('update')
-  updatePassword(
-    @GetUser('_id') _id: string,
-    @Body() updatePasswordDto: UpdatePasswordDto,
-  ): Promise<MessageResDto> {
+  updatePassword(@GetUser('_id') _id: string, @Body() updatePasswordDto: UpdatePasswordDto): Promise<MessageResDto> {
     return this.passwordService.updatePassword(_id, updatePasswordDto);
   }
 }
