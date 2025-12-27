@@ -46,6 +46,7 @@ jobs:
             --build-arg MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
             --build-arg MAIL_FROM=${{ secrets.MAIL_FROM }} \
             --build-arg MAIL_PORT=${{ secrets.MAIL_PORT }} \
+            --build-arg MAIL_BREVO_API_KEY=${{ secrets.MAIL_BREVO_API_KEY }} \
             --build-arg BCRYPTJS_SALT_ROUNDS=${{ secrets.BCRYPTJS_SALT_ROUNDS }} \
             -f Dockerfile.prod --target production \
             -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} .

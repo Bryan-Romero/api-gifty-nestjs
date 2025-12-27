@@ -42,4 +42,5 @@ export interface MailType {
   password: string;
   from: string;
   port: number;
+  brevo_api_key: string;
 }

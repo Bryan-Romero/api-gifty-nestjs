@@ -37,6 +37,7 @@ export const validationSchema = Joi.object({
   MAIL_PASSWORD: Joi.string().required(),
   MAIL_FROM: Joi.string().required(),
   MAIL_PORT: Joi.number().required(),
+  MAIL_BREVO_API_KEY: Joi.string().required(),
 
   // bcryptjs
   BCRYPTJS_SALT_ROUNDS: Joi.number().default(10),

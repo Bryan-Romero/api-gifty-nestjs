@@ -30,7 +30,10 @@ import { MailService } from './mail.service';
             rejectUnauthorized: false, // Evita problemas con certificados
           },
           defaults: {
-            from: `"GIFty" <${mail.from}>`,
+            from: {
+              address: mail.from,
+              name: 'GIFty',
+            },
           },
           template: {
             dir: join(process.cwd(), '/static/templates'),

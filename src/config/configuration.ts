@@ -35,6 +35,7 @@ export const configuration = (): ConfigurationType => ({
     password: process.env.MAIL_PASSWORD,
     from: process.env.MAIL_FROM,
     port: parseInt(process.env.MAIL_PORT, 10),
+    brevo_api_key: process.env.MAIL_BREVO_API_KEY,
   },
 });
 

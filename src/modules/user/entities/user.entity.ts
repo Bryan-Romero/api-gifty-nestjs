@@ -43,7 +43,7 @@ export class User {
   @Prop({ type: String, select: false })
   hashRefreshToken: string;
 
-  @Prop({ type: Boolean, default: true })
+  @Prop({ type: Boolean, default: false })
   emailVerified: boolean;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: Favorite.name }] })
