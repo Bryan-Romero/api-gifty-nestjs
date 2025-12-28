@@ -20,6 +20,9 @@ jobs:
       name: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
 
     steps:
+      - name: Show target environment
+        run: echo "Deploying to ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}"
+
       # Step 1: Clone the repository code into the runner
       # This allows access to repository context and branch information
       - name: Checkout repository
