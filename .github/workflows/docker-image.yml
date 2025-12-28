@@ -73,7 +73,7 @@ jobs:
             --build-arg MAIL_BREVO_API_KEY=${{ secrets.MAIL_BREVO_API_KEY }} \
             --build-arg BCRYPTJS_SALT_ROUNDS=${{ secrets.BCRYPTJS_SALT_ROUNDS }} \
             -f Dockerfile.prod --target production \
-            -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} .
+            -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-${{ steps.set-env.outputs.image_tag }}:${{ github.sha }} .
         # github.sha: Automatic variable containing the commit hash (unique identifier)
         # Example result: username/api-gifty-nestjs-production:abc123def456
 
