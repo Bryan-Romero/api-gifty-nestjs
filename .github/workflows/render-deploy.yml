@@ -17,11 +17,11 @@ jobs:
     # - dev branch → uses 'development' environment (with its own RENDER_DEPLOY_HOOK_URL)
     # - main/production → uses 'production' environment (with its own RENDER_DEPLOY_HOOK_URL)
     environment:
-      name: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
+      name: ${{ github.event.workflow_run.head_branch == 'dev' && 'development' || 'production' }}
 
     steps:
       - name: Show target environment
-        run: echo "Deploying to ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}"
+        run: echo "Deploying to ${{ github.event.workflow_run.head_branch == 'dev' && 'development' || 'production' }}"
 
       # Step 1: Clone the repository code into the runner
       # This allows access to repository context and branch information
