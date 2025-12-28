@@ -81,10 +81,10 @@ jobs:
       # Purpose: Keep a stable tag that always points to the most recent version
       # This allows Render or other services to always pull the latest version
       - name: Tag the Docker image
-        run: docker tag ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest
+        run: docker tag ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-${{ steps.set-tag.outputs.image_tag }}:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-${{ steps.set-tag.outputs.image_tag }}:latest
 
       # Step 6: Upload the image to Docker Hub registry
       # Only pushes the ':latest' tag, which also uploads the underlying image
       # Render will detect this new ':latest' tag and trigger automatic deployment
       - name: Push the Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-${{ steps.set-tag.outputs.image_tag }}:latest
