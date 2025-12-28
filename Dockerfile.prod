@@ -1,47 +1,47 @@
-###################
-# BASE
-###################
+# ============================================================
+# BASE STAGE - Lightweight Node.js foundation
+# ============================================================
 FROM node:18-alpine AS base
 
 ENV DIR=/usr/src/app
-
 WORKDIR $DIR
 
-###################
-# BUILD FOR PRODUCTION
-###################
+# ============================================================
+# BUILD STAGE - Compile TypeScript to JavaScript
+# ============================================================
 FROM base AS build
 
+# Install dumb-init for proper signal handling and zombie process prevention
 RUN apk update && apk add --no-cache dumb-init
-# apk update actualiza el índice de paquetes de Alpine.
-# apk add --no-cache dumb-init instala dumb-init sin guardar caché.
-# Así puedes usar dumb-init como entrypoint para tu app Node.js y mejorar el manejo de procesos dentro del contenedor.
 
+# Copy dependency files first for Docker layer caching optimization
 COPY package*.json $DIR
 COPY tsconfig*.json $DIR
 COPY src $DIR/src
 COPY static $DIR/static
 
+# npm ci: Fast, reliable install using exact versions from package-lock.json
 RUN npm ci
-# Es más rápido y confiable para entornos de integración continua y producción.
-# Elimina la carpeta node_modules antes de instalar, asegurando una instalación limpia.
 
+# Build TypeScript → JavaScript and remove devDependencies to reduce image size
 RUN npm run build && \
     npm prune --production
-# npm run build 
-    # normalmente transpila tu código TypeScript a JavaScript y lo coloca en la carpeta dist.
-# npm prune --production
-    # Elimina del directorio node_modules todos los paquetes que están listados como devDependencies en tu package.json.
-    # Deja solo las dependencias necesarias para producción.
-    # Esto reduce el tamaño de la imagen y mejora la seguridad y el rendimiento.
 
-
-###################
-# PRODUCTION
-###################
+# ============================================================
+# PRODUCTION STAGE - Final optimized image
+# ============================================================
 FROM base AS production
-# ✅ Si pasas las variables con docker build --build-arg, 
-# necesitas ARG y ENV en el Dockerfile para hacerlas persistentes.
+
+# ============================================================
+# Build Arguments → Environment Variables
+# ARG: Receives values during build (docker build --build-arg)
+# ENV: Makes values available at runtime
+# ============================================================
+
+# Node.js production mode: Enables optimizations, disables debug features
+ENV NODE_ENV=production
+
+# Application config
 ARG PORT
 ENV PORT=$PORT
 
@@ -54,36 +54,46 @@ ENV PREFIX=$PREFIX
 ARG FRONTEND_URL
 ENV FRONTEND_URL=$FRONTEND_URL
 
+# Password hashing: 10-12 rounds recommended (higher = more secure but slower)
+ARG BCRYPTJS_SALT_ROUNDS
+ENV BCRYPTJS_SALT_ROUNDS=$BCRYPTJS_SALT_ROUNDS
+
+# JWT tokens: Access tokens (short-lived for API requests)
 ARG JWT_SECRET
 ENV JWT_SECRET=$JWT_SECRET
 
 ARG JWT_EXPIRES_IN
 ENV JWT_EXPIRES_IN=$JWT_EXPIRES_IN
 
+# JWT tokens: Refresh tokens (long-lived for getting new access tokens)
 ARG REFRESH_JWT_SECRET
 ENV REFRESH_JWT_SECRET=$REFRESH_JWT_SECRET
 
 ARG REFRESH_JWT_EXPIRES_IN
 ENV REFRESH_JWT_EXPIRES_IN=$REFRESH_JWT_EXPIRES_IN
 
+# JWT tokens: Email verification
 ARG MAIL_JWT_SECRET
 ENV MAIL_JWT_SECRET=$MAIL_JWT_SECRET
 
 ARG MAIL_JWT_EXPIRES_IN
 ENV MAIL_JWT_EXPIRES_IN=$MAIL_JWT_EXPIRES_IN
 
+# JWT tokens: Password reset
 ARG PASSWORD_JWT_SECRET
 ENV PASSWORD_JWT_SECRET=$PASSWORD_JWT_SECRET
 
 ARG PASSWORD_JWT_EXPIRES_IN
 ENV PASSWORD_JWT_EXPIRES_IN=$PASSWORD_JWT_EXPIRES_IN
 
+# Database connection
 ARG DATABASE_URI
 ENV DATABASE_URI=$DATABASE_URI
 
 ARG DATABASE_NAME
 ENV DATABASE_NAME=$DATABASE_NAME
 
+# Initial admin user created on first run
 ARG DEFAULT_USER_NAME
 ENV DEFAULT_USER_NAME=$DEFAULT_USER_NAME
 
@@ -96,6 +106,7 @@ ENV DEFAULT_USER_EMAIL=$DEFAULT_USER_EMAIL
 ARG DEFAULT_USER_PASSWORD
 ENV DEFAULT_USER_PASSWORD=$DEFAULT_USER_PASSWORD
 
+# SMTP email configuration
 ARG MAIL_HOST
 ENV MAIL_HOST=$MAIL_HOST
 
@@ -111,25 +122,26 @@ ENV MAIL_FROM=$MAIL_FROM
 ARG MAIL_PORT
 ENV MAIL_PORT=$MAIL_PORT
 
+# Brevo (Sendinblue) API for transactional emails
 ARG MAIL_BREVO_API_KEY
 ENV MAIL_BREVO_API_KEY=$MAIL_BREVO_API_KEY
 
-ARG BCRYPTJS_SALT_ROUNDS
-ENV BCRYPTJS_SALT_ROUNDS=$BCRYPTJS_SALT_ROUNDS
-
-# Valor por defecto, pero puede ser sobrescrito por Compose
-ENV NODE_ENV=production
-# El usuario node ya existe en las imágenes oficiales de Node.js y es un usuario sin privilegios de root.
+# Run as non-root user for security
 ENV USER=node
 
+# ============================================================
+# Copy only production artifacts from build stage
+# ============================================================
 COPY --from=build /usr/bin/dumb-init /usr/bin/dumb-init
 COPY --from=build $DIR/node_modules $DIR/node_modules
 COPY --from=build $DIR/dist $DIR/dist
 COPY --from=build $DIR/static $DIR/static
 
+# Document which port the app uses (doesn't actually expose it)
 EXPOSE ${PORT}
 
-# Aquí, ${USER} se expande a node, así que tu aplicación no se ejecuta como root, sino como el usuario seguro node.
+# Switch to non-root user (prevents security exploits)
 USER ${USER}
 
+# Start application with dumb-init for graceful signal handling
 CMD ["dumb-init", "node", "dist/main" ]

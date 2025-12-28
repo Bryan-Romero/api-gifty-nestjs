@@ -1,38 +1,157 @@
+# ==============================================================================
+# DOCKER COMPOSE - Local development environment
+# ==============================================================================
+# Defines and orchestrates multiple containers (app + database) for local dev
+
 services:
+  # ===========================================================================
+  # APPLICATION SERVICE - NestJS API in development mode
+  # ===========================================================================
   development:
+    # Container name: Used to reference this container (e.g., docker logs api-gifty-nestjs-dev)
     container_name: api-gifty-nestjs-dev
+
+    # Restart policy options (currently disabled):
     # restart: unless-stopped
-    # - always: el contenedor se reinicia siempre, incluso si se cayó por error o si reinicias la máquina.
-    # - unless-stopped: se reinicia automáticamente solo si tú no lo detuviste manualmente (docker stop). Ideal para dev.
-    # - no: no se reinicia solo.
+    # - always: Restarts on crash, error, or machine reboot
+    # - unless-stopped: Restarts automatically unless manually stopped (docker stop)
+    # - no: Never auto-restarts (default)
+    # - on-failure: Only restarts if container exits with error code
+
+    # Build configuration
     build:
+      # Dockerfile to use (the one with multi-stage builds)
       dockerfile: Dockerfile
+
+      # Build context: Directory containing source code and Dockerfile
+      # . means current directory
       context: .
+
+      # Target stage: Uses the "development" stage from Dockerfile
+      # This stage includes hot-reload and debugging tools
       target: development
+
+    # Port mapping: host:container
+    # Exposes container ports to your local machine
     ports:
+      # Application port (value from .env file)
       - ${PORT}:${PORT}
-      - 9229:9229 # for debugging
+
+      # Node.js debugger port (for VSCode, Chrome DevTools)
+      - 9229:9229
+
+    # Volume mounts: Sync files between host and container
     volumes:
+      # Bind mount: Current directory → /usr/src/app in container
+      # Changes in your code reflect immediately (hot-reload)
       - .:/usr/src/app
+
+      # Anonymous volume: Prevents overwriting container's node_modules
+      # Without this, local node_modules would override container's
+      # Ensures dependencies stay intact inside container
       - /usr/src/app/node_modules
+
+    # Service dependencies: Wait for mongo before starting app
+    # Ensures database is ready before app tries to connect
+    # Note: "depends_on" only waits for container start, not full readiness
     depends_on:
       - mongo
 
+  # ===========================================================================
+  # DATABASE SERVICE - MongoDB for local development
+  # ===========================================================================
   mongo:
+    # Use official MongoDB image from Docker Hub (latest version)
+    # Production should pin specific version (e.g., mongo:7.0)
     image: mongo:latest
+
+    # Container name for easy reference
     container_name: mymongodb
+
+    # Restart policy (currently disabled)
     # restart: always
+
+    # Port mapping: Makes MongoDB accessible from host machine
+    # localhost:27017 → container:27017
+    # Connection string: mongodb://localhost:27017
     ports:
       - 27017:27017
+
+    # Persistent storage: Data survives container restarts/rebuilds
     volumes:
+      # Database files: Stored in ./mongo directory on host
+      # Survives "docker-compose down" (but not "docker-compose down -v")
       - ./mongo:/data/db
+
+      # MongoDB logs: Stored in ./mongo/log directory
+      # Useful for debugging database issues
       - ./mongo/log:/var/log/mongodb/
 
+# ==============================================================================
+# NAMED VOLUMES (currently unused but declared)
+# ==============================================================================
+# Named volumes can be shared between containers
+# Example usage: volumes: [node_modules:/usr/src/app/node_modules]
 volumes:
   node_modules:
 
-  # docker-compose --env-file .env.development up -d -V --build
-  # docker-compose --env-file .env.development stop
+# ============================================
+# DOCKER COMPOSE COMMANDS
+# ============================================
 
-  # docker-compose -f docker-compose.prod.yml --env-file .env.production up -d -V --build
-  # docker-compose -f docker-compose.prod.yml --env-file .env.production stop
+# Development environment
+# docker-compose --env-file .env.development up -d -V --build
+
+# Production environment
+# docker-compose -f docker-compose.prod.yml --env-file .env.production up -d -V --build
+
+# ============================================
+# FLAGS EXPLANATION
+# ============================================
+# -f docker-compose.prod.yml -> Specifies which compose file to use (only needed if not using default docker-compose.yml)
+# --env-file .env.development -> Specifies the environment variables file to use
+# up -> Creates and starts the containers
+# -d -> Runs containers in detached mode (in the background)
+# -V -> Recreates anonymous volumes instead of retrieving data from the previous ones
+# --build -> Builds images before starting containers
+
+# ============================================
+# VOLUMES EXPLANATION
+# ============================================
+# volumes:
+#   - .:/usr/src/app                 # Mounts current directory into container (enables hot reload)
+#   - /usr/src/app/node_modules      # Anonymous volume - gets recreated with -V flag
+
+# ============================================
+# USEFUL COMMANDS
+# ============================================
+
+# View running containers
+# docker-compose ps
+
+# View logs in real time
+# docker-compose --env-file .env.development logs -f
+
+# Restart containers without rebuilding (useful after changing .env files)
+# docker-compose --env-file .env.development restart
+
+# Stop containers (keeps them, can be restarted later)
+# docker-compose --env-file .env.development stop
+
+# Stop and remove containers (complete cleanup)
+# docker-compose --env-file .env.development down
+
+# ============================================
+# WHEN TO USE EACH COMMAND
+# ============================================
+# Code changes (.ts, .js files)     -> Do nothing (hot reload handles it)
+# Environment variable changes      -> Use 'restart' command
+# Dockerfile or compose changes     -> Use 'up -d --build'
+# package.json changes              -> Use 'up -d -V --build'
+
+# ============================================
+# GENERATE SECURE RANDOM SECRET (PowerShell)
+# ============================================
+# Run this command in PowerShell to generate a secure 64-byte base64 encoded secret
+# Useful for JWT_SECRET, API keys, or any secret tokens
+# [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(64))
