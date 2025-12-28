@@ -1,25 +1,49 @@
 name: Build and Push Docker Image
 
+# Trigger: This workflow runs when code is pushed to main or production branches
 on:
   push:
-    branches: [main, production]
+    branches: [main, dev]
   # pull_request:
   #   branches: [main]
 
 jobs:
   build:
+    # Runner: Uses the latest Ubuntu virtual machine provided by GitHub
     runs-on: ubuntu-latest
+    # Environment selection: Uses 'development' for dev branch, 'production' for main
+    # This allows using the same secret names (e.g., DATABASE_URI) with different values per environment
+    environment:
+      name: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
 
     steps:
+      # Step 1: Clone the repository code into the runner
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Determine environment variables based on the branch
+      - name: Set environment based on branch
+        id: set-env
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+            echo "image_tag=development" >> $GITHUB_OUTPUT
+          else
+            echo "image_tag=production" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 3: Authenticate with Docker Hub using credentials stored in GitHub Secrets
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Step 4: Build the Docker image
+      # --build-arg: Pass environment variables as build arguments to the Dockerfile
+      # -f: Specify which Dockerfile to use (Dockerfile.prod instead of default Dockerfile)
+      # --target: Use multi-stage build and stop at the 'production' stage
+      # -t: Tag the image with username/image-name:commit-hash format
+      # .: Use current directory as build context
       - name: Build the Docker image
         run: |
           docker build \
@@ -50,12 +74,17 @@ jobs:
             --build-arg BCRYPTJS_SALT_ROUNDS=${{ secrets.BCRYPTJS_SALT_ROUNDS }} \
             -f Dockerfile.prod --target production \
             -t ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} .
-        # github.sha
-        # Esta variable es automática y la proporciona GitHub en cada ejecución de GitHub Actions.
-        # Representa el hash del commit actual, útil para etiquetar imágenes de Docker con un identificador único
+        # github.sha: Automatic variable containing the commit hash (unique identifier)
+        # Example result: username/api-gifty-nestjs-production:abc123def456
 
+      # Step 5: Create an additional tag called 'latest' pointing to the same image
+      # Purpose: Keep a stable tag that always points to the most recent version
+      # This allows Render or other services to always pull the latest version
       - name: Tag the Docker image
         run: docker tag ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest
 
+      # Step 6: Upload the image to Docker Hub registry
+      # Only pushes the ':latest' tag, which also uploads the underlying image
+      # Render will detect this new ':latest' tag and trigger automatic deployment
       - name: Push the Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/api-gifty-nestjs-production:latest

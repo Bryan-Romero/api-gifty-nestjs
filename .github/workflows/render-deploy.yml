@@ -1,23 +1,40 @@
 name: Deploy to Render
 
+# Trigger: This workflow runs automatically AFTER another workflow completes
+# It waits for 'Build and Push Docker Image' workflow to finish successfully
 on:
   workflow_run:
     workflows: ['Build and Push Docker Image']
     types:
-      - completed
+      - completed # Triggers when the specified workflow finishes (success or failure)
 
 jobs:
   deploy:
+    # Runner: Uses the latest Ubuntu virtual machine provided by GitHub
     runs-on: ubuntu-latest
 
+    # Environment selection: GitHub will automatically use the secrets from the selected environment
+    # - dev branch → uses 'development' environment (with its own RENDER_DEPLOY_HOOK_URL)
+    # - main/production → uses 'production' environment (with its own RENDER_DEPLOY_HOOK_URL)
+    environment:
+      name: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
+
     steps:
+      # Step 1: Clone the repository code into the runner
+      # This allows access to repository context and branch information
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Trigger deployment on Render using webhook
+      # Note: We use the SAME secret name (RENDER_DEPLOY_HOOK_URL) for both environments
+      # GitHub automatically uses the correct value based on the selected environment:
+      # - If environment is 'production' → uses the URL configured in production environment
+      # - If environment is 'development' → uses the URL configured in development environment
+      #
+      # if: Conditional check - only runs for main or dev branches
+      # curl: Makes an HTTP request to Render's deploy hook URL
+      # Purpose: Tells Render to pull the new Docker image and redeploy the service
       - name: Deploy
-        # Only run this step if the branch is main
-        if: github.ref == 'refs/heads/main'
-        env:
-          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
         run: |
-          curl "$deploy_url"
+          curl "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
